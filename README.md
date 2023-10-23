@@ -3,7 +3,7 @@
 
 "Save Transfer Wizard" is a versatile tool designed to streamline the process of transferring game saves between a PlayStation 5 console and a Windows PC. With its user-friendly interface and powerful features, it enables users to effortlessly copy, upload, and delete their game saves via FTP (File Transfer Protocol).
 
-This tool is designed to address the needs of a set of users, specifically those who encounter difficulties with  the PlayStation 5 console that doesn't allow save transfer until the user signs in. Such challenges can hinder the smooth transfer of game saves. Save Transfer Wizard serves as a solution for those individuals who wish to manage their game saves, especially in light of the increasing popularity of PS4 Fpkgs. It acts as a bridge, offering an effective method until more comprehensive options like PSN patch or console activation are accessible.
+This tool caters to a specific audience, particularly those who face challenges with their jailbroken PlayStation 5 lacking console activation, which can impede the seamless transfer of game saves. With the surge in popularity of PS4 FPKGs, Save Transfer Wizard bridges the gap, providing an effective solution for individuals looking to manage their game saves until more comprehensive methods like PSN patch or offline console activation become available.
 
 
 
