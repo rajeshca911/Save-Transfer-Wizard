@@ -1,6 +1,3 @@
-<h1 align="center">Hi 👋, I'm Rajesh</h1>
-<h3 align="center">A passionate frontend developer from India</h3>
-
 
 # Save Transfer Wizard
 
@@ -60,8 +57,13 @@ This tool caters to a specific audience, particularly those who face challenges 
 - click on Delete & confirm
 - Save will be Deleted
 
+<h1 align="center">About Me </h1>
+<h2 align="center">Hi 👋, I'm Rajesh</h2>
+<h3 align="center">A passionate frontend developer from India</h3>
 
 
+## 🛠 Skills
+Visual Basic
 
 
 
