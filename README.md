@@ -20,7 +20,8 @@ This tool caters to a specific audience, particularly those who face challenges 
 - Works only on windows
 - Cant resign Saves
 - Require to enable FTP in console
-- Currently Fetches saves only from \User\home\savedata
+- Currently Fetches saves only from \Userprofile\home\savedata
+\Userprofile\home\savedata_Prospero
 
 
 ## Video Tutorial
