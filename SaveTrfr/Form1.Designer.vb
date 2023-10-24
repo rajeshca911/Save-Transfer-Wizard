@@ -39,6 +39,8 @@ Partial Class Form1
         Me.BtnDownload = New System.Windows.Forms.Button()
         Me.GetUsersBtn = New System.Windows.Forms.Button()
         Me.Button1 = New System.Windows.Forms.Button()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.CmbPs45 = New System.Windows.Forms.ComboBox()
         Me.SuspendLayout()
         '
         'PSIPtxt
@@ -81,9 +83,10 @@ Partial Class Form1
         '
         'UserCmbBox
         '
+        Me.UserCmbBox.Enabled = False
         Me.UserCmbBox.Font = New System.Drawing.Font("Segoe UI", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.UserCmbBox.FormattingEnabled = True
-        Me.UserCmbBox.Location = New System.Drawing.Point(36, 134)
+        Me.UserCmbBox.Location = New System.Drawing.Point(36, 133)
         Me.UserCmbBox.Name = "UserCmbBox"
         Me.UserCmbBox.Size = New System.Drawing.Size(191, 25)
         Me.UserCmbBox.TabIndex = 4
@@ -103,17 +106,18 @@ Partial Class Form1
         '
         Me.Statlbl.Font = New System.Drawing.Font("Segoe UI", 9.75!, CType((System.Drawing.FontStyle.Bold Or System.Drawing.FontStyle.Underline), System.Drawing.FontStyle), System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Statlbl.ForeColor = System.Drawing.Color.Maroon
-        Me.Statlbl.Location = New System.Drawing.Point(2, 225)
+        Me.Statlbl.Location = New System.Drawing.Point(2, 260)
         Me.Statlbl.Name = "Statlbl"
-        Me.Statlbl.Size = New System.Drawing.Size(355, 27)
+        Me.Statlbl.Size = New System.Drawing.Size(429, 27)
         Me.Statlbl.TabIndex = 9
         Me.Statlbl.Text = "Status : Not Connected"
         '
         'CmbSave
         '
+        Me.CmbSave.Enabled = False
         Me.CmbSave.Font = New System.Drawing.Font("Segoe UI", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CmbSave.FormattingEnabled = True
-        Me.CmbSave.Location = New System.Drawing.Point(36, 187)
+        Me.CmbSave.Location = New System.Drawing.Point(36, 229)
         Me.CmbSave.Name = "CmbSave"
         Me.CmbSave.Size = New System.Drawing.Size(191, 25)
         Me.CmbSave.TabIndex = 10
@@ -124,7 +128,7 @@ Partial Class Form1
         Me.Label4.AutoSize = True
         Me.Label4.Font = New System.Drawing.Font("Segoe UI Semibold", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label4.ForeColor = System.Drawing.Color.DarkBlue
-        Me.Label4.Location = New System.Drawing.Point(36, 167)
+        Me.Label4.Location = New System.Drawing.Point(36, 209)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(104, 17)
         Me.Label4.TabIndex = 11
@@ -134,7 +138,7 @@ Partial Class Form1
         '
         Me.Verlbl.Font = New System.Drawing.Font("Segoe UI Semibold", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Verlbl.ForeColor = System.Drawing.Color.DarkBlue
-        Me.Verlbl.Location = New System.Drawing.Point(2, 250)
+        Me.Verlbl.Location = New System.Drawing.Point(2, 285)
         Me.Verlbl.Name = "Verlbl"
         Me.Verlbl.Size = New System.Drawing.Size(313, 24)
         Me.Verlbl.TabIndex = 12
@@ -142,7 +146,7 @@ Partial Class Form1
         '
         'ProgressBar1
         '
-        Me.ProgressBar1.Location = New System.Drawing.Point(21, 275)
+        Me.ProgressBar1.Location = New System.Drawing.Point(21, 310)
         Me.ProgressBar1.Margin = New System.Windows.Forms.Padding(2)
         Me.ProgressBar1.Name = "ProgressBar1"
         Me.ProgressBar1.Size = New System.Drawing.Size(394, 8)
@@ -212,7 +216,7 @@ Partial Class Form1
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(383, 287)
+        Me.Button1.Location = New System.Drawing.Point(341, 283)
         Me.Button1.Margin = New System.Windows.Forms.Padding(2)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(56, 22)
@@ -220,12 +224,37 @@ Partial Class Form1
         Me.Button1.Text = "Credits"
         Me.Button1.UseVisualStyleBackColor = True
         '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Font = New System.Drawing.Font("Segoe UI Semibold", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label5.ForeColor = System.Drawing.Color.DarkBlue
+        Me.Label5.Location = New System.Drawing.Point(36, 161)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(129, 17)
+        Me.Label5.TabIndex = 17
+        Me.Label5.Text = "Save Type [PS4/PS5]"
+        '
+        'CmbPs45
+        '
+        Me.CmbPs45.Enabled = False
+        Me.CmbPs45.Font = New System.Drawing.Font("Segoe UI", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.CmbPs45.FormattingEnabled = True
+        Me.CmbPs45.Items.AddRange(New Object() {"PS4", "PS5"})
+        Me.CmbPs45.Location = New System.Drawing.Point(36, 181)
+        Me.CmbPs45.Name = "CmbPs45"
+        Me.CmbPs45.Size = New System.Drawing.Size(191, 25)
+        Me.CmbPs45.TabIndex = 16
+        Me.CmbPs45.Text = "Select Save Folder"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.White
-        Me.ClientSize = New System.Drawing.Size(443, 309)
+        Me.ClientSize = New System.Drawing.Size(443, 325)
+        Me.Controls.Add(Me.Label5)
+        Me.Controls.Add(Me.CmbPs45)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.BtnDelete)
         Me.Controls.Add(Me.ProgressBar1)
@@ -244,8 +273,8 @@ Partial Class Form1
         Me.Controls.Add(Me.PSIPtxt)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.MaximumSize = New System.Drawing.Size(459, 348)
-        Me.MinimumSize = New System.Drawing.Size(459, 348)
+        Me.MaximumSize = New System.Drawing.Size(459, 364)
+        Me.MinimumSize = New System.Drawing.Size(459, 364)
         Me.Name = "Form1"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Save Transfer Wizard"
@@ -270,4 +299,6 @@ Partial Class Form1
     Friend WithEvents ProgressBar1 As ProgressBar
     Friend WithEvents BtnDelete As Button
     Friend WithEvents Button1 As Button
+    Friend WithEvents Label5 As Label
+    Friend WithEvents CmbPs45 As ComboBox
 End Class

@@ -54,7 +54,7 @@ Public Class Form1
                 constat = True
                 'Disconnect
                 conn.Disconnect()
-
+                SelectFirstItem(Me.UserCmbBox)
 
                 My.Settings.IPadd = PSip
                 My.Settings.PortNo = PortNo
@@ -76,9 +76,7 @@ Public Class Form1
 
         End Try
 
-        BtnDownload.Enabled = constat
-        BtnUpload.Enabled = constat
-        BtnDelete.Enabled = constat
+        ENDISBTN(constat)
 
     End Sub
 
@@ -88,7 +86,7 @@ Public Class Form1
             DownloadDirectory()
         Catch ex As Exception
             MessageBox.Show("Error Code: " & Err.Number & vbNewLine & ex.Message, "Can't Download", MessageBoxButtons.OK, MessageBoxIcon.Asterisk)
-
+            ENDISBTN(False)
         End Try
         ProgressBar1.Visible = False
         ProgressBar1.Value = 0
@@ -104,50 +102,69 @@ Public Class Form1
             Throw New Exception("Please Select Save Folder!")
         End If
 
-        If Me.UserCmbBox.SelectedItem IsNot Nothing Then
-            UserProfilePath = String.Format("\user\home\{0}\savedata\{1}", Me.UserCmbBox.SelectedItem.ToString, pssave)
-        Else
-            ' Handle missing Profile selection
-            Throw New Exception("Please Select Profile!")
-        End If
+        Dim Slocation As String = SAVETYPE()
+        If Not Slocation = "" Then
 
 
-        ' Dim UserProfilePath As String = String.Format("\user\home\{0}\savedata\{1}", Me.UserCmbBox.SelectedItem.ToString, pssave)
-        Using dftp = New FtpClient(PSip, "anonymous", "anonymous", PortNo)
-            dftp.Connect()
+            ' Get immediate subdirectories in /user/home/
+            Dim directoryPath As String = "/user/home/" & Me.UserCmbBox.SelectedItem.ToString & "/" & Slocation
 
-            ' download a folder And all its files
-            If Not Directory.Exists(saveTransferImportPath & "\" & pssave) Then
-                ' Create the directory if it doesn't exist
-                Directory.CreateDirectory(saveTransferImportPath & "\" & pssave)
+            If Me.UserCmbBox.SelectedItem IsNot Nothing Then
+                UserProfilePath = String.Format("\user\home\{0}\{2}\{1}", Me.UserCmbBox.SelectedItem.ToString, pssave, Slocation)
+            Else
+                ' Handle missing Profile selection
+                Throw New Exception("Please Select Profile!")
             End If
 
-            ProgressBar1.Visible = True
-            ProgressBar1.Value = 0
-            ProgressBar1.Style = ProgressBarStyle.Marquee
-            Dim progress As Action(Of FtpProgress) =
+
+            ' Dim UserProfilePath As String = String.Format("\user\home\{0}\savedata\{1}", Me.UserCmbBox.SelectedItem.ToString, pssave)
+            Using dftp = New FtpClient(PSip, "anonymous", "anonymous", PortNo)
+                dftp.Connect()
+
+                ' download a folder And all its files
+                If Not Directory.Exists(saveTransferImportPath & "\" & pssave) Then
+                    ' Create the directory if it doesn't exist
+                    Directory.CreateDirectory(saveTransferImportPath & "\" & pssave)
+                End If
+
+                ProgressBar1.Visible = True
+                ProgressBar1.Value = 0
+                ProgressBar1.Style = ProgressBarStyle.Marquee
+                Dim progress As Action(Of FtpProgress) =
                   Sub(ByVal p As FtpProgress)
                       If p.Progress = 1 Then
-                              ' all done!
-                          Else
-                              ' percent done = (p.Progress * 100)
-                              ProgressBar1.Value = Math.Min(100, Math.Max(0, CInt(p.Progress * 100)))
+                          ' all done!
+                      Else
+                          ' percent done = (p.Progress * 100)
+                          ProgressBar1.Value = Math.Min(100, Math.Max(0, CInt(p.Progress * 100)))
                       End If
                   End Sub
 
-            dftp.DownloadDirectory(saveTransferImportPath & "\" & pssave, UserProfilePath, FtpFolderSyncMode.Update, FtpLocalExists.Overwrite, progress:=progress)
+                dftp.DownloadDirectory(saveTransferImportPath & "\" & pssave, UserProfilePath, FtpFolderSyncMode.Update, FtpLocalExists.Overwrite, progress:=progress)
 
-            '' download a folder And all its files, And delete extra files on disk
-            'dftp.DownloadDirectory(saveTransferImportPath, UserProfilePath, FtpFolderSyncMode.Mirror)
-            dftp.Disconnect()
-            MessageBox.Show("Save Downloaded to " & vbNewLine & saveTransferImportPath & "\" & pssave)
-        End Using
+                '' download a folder And all its files, And delete extra files on disk
+                'dftp.DownloadDirectory(saveTransferImportPath, UserProfilePath, FtpFolderSyncMode.Mirror)
+                dftp.Disconnect()
+                MessageBox.Show("Save Downloaded to " & vbNewLine & saveTransferImportPath & "\" & pssave)
+            End Using
+        End If
         Me.Statlbl.Text = "Idle.."
+
+
     End Sub
     Sub UploadDirectory(sourcepath As String, foldername As String)
         'Dim pssave As String = Me.CmbSave.SelectedItem.ToString
         '/user/home/12675175/savedata/
-        Dim UserProfilePath As String = String.Format("\user\home\{0}\savedata\{1}", Me.UserCmbBox.SelectedItem.ToString, foldername)
+        Dim sdataloc As String = SAVETYPE()
+
+        If sdataloc = "" Then
+
+            ' Handle missing selected item
+            Throw New Exception("Please Select  SAVETYPE!")
+        End If
+
+
+        Dim UserProfilePath As String = String.Format("\user\home\{0}\{2}\{1}", Me.UserCmbBox.SelectedItem.ToString, foldername, sdataloc)
 
         'MessageBox.Show(UserProfilePath)
         If Not Me.UserCmbBox.SelectedItem.ToString Is Nothing Then
@@ -202,7 +219,7 @@ Public Class Form1
 
                     ' Get immediate subdirectories in /user/home/
                     Dim directoryPath As String = "/user/home/" & Me.UserCmbBox.SelectedItem.ToString & "/savedata/"
-
+                    Me.CmbPs45.SelectedIndex = 0
                     Dim subdirectories() As FtpListItem = conn.GetListing(directoryPath, FtpListOption.Modify)
 
                     ' Iterate through the array of items and add directory names to the ComboBox
@@ -223,6 +240,7 @@ Public Class Form1
 
                     Me.Statlbl.Text = "Now Dowload Or Upload Saves "
                 End Using
+                SelectFirstItem(Me.CmbSave)
             Catch ex As Exception
 
                 MessageBox.Show("Error Code: " & Err.Number & vbNewLine & ex.Message, "Can't Fetch Saves", MessageBoxButtons.OK, MessageBoxIcon.Asterisk)
@@ -235,7 +253,7 @@ Public Class Form1
 
     Private Sub BtnUpload_Click(sender As Object, e As EventArgs) Handles BtnUpload.Click
         Dim selectedDirectory As String = ""
-        Me.Statlbl.Text = "Uploading.."
+        Me.Statlbl.Text = "Uploading might require some time..."
         Try
             ' Create a new instance of FolderBrowserDialog
             Using folderBrowser As New FolderBrowserDialog()
@@ -257,14 +275,15 @@ Public Class Form1
 
         Catch ex As Exception
             MessageBox.Show("Error Code: " & Err.Number & vbNewLine & ex.Message, "Can't Upload", MessageBoxButtons.OK, MessageBoxIcon.Asterisk)
-
+            ENDISBTN(False)
         End Try
         ProgressBar1.Visible = False
         ProgressBar1.Value = 0
     End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Verlbl.Text = "Version:" & My.Application.Info.Version.ToString
+        ENDISBTN(False)
+        Verlbl.Text = "Version : " & My.Application.Info.Version.ToString
         Try
             PSIPtxt.Text = My.Settings.IPadd.ToString
             PSportTxt.Text = My.Settings.PortNo.ToString
@@ -297,9 +316,17 @@ Public Class Form1
                 ' Handle missing Save Folder selection
                 Throw New Exception("Please Select Save Folder!")
             End If
+            'SAVE TYPE
+            Dim sdataloc As String = SAVETYPE()
 
+            If sdataloc = "" Then
+
+                Throw New Exception("Please Select Save Type!")
+            End If
+
+            'SAVE TYPE*** 
             If Me.UserCmbBox.SelectedItem IsNot Nothing Then
-                UserProfilePath = String.Format("\user\home\{0}\savedata\{1}", Me.UserCmbBox.SelectedItem.ToString, pssave)
+                UserProfilePath = String.Format("\user\home\{0}\{2}\{1}", Me.UserCmbBox.SelectedItem.ToString, pssave, sdataloc)
             Else
                 ' Handle missing Profile selection
                 Throw New Exception("Please Select Profile!")
@@ -313,7 +340,7 @@ Public Class Form1
 
         Catch ex As Exception
             MessageBox.Show(ex.Message, "Cant Delete")
-
+            ENDISBTN(False)
         End Try
     End Sub
 
@@ -321,5 +348,106 @@ Public Class Form1
         Me.Hide()
         Credits.ShowDialog()
         Me.Show()
+    End Sub
+
+    Private Sub CmbSave_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbSave.SelectedIndexChanged
+
+    End Sub
+
+    Private Sub CmbPs45_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CmbPs45.SelectedIndexChanged
+        SelectUserProfile()
+    End Sub
+    Sub SelectUserProfile()
+        'Select User Profile
+        If Not Me.UserCmbBox.SelectedItem.ToString = "Select User Profile" Or Nothing Then
+            'MessageBox.Show(Me.UserCmbBox.SelectedItem.ToString)
+            Try
+                Using conn As New FtpClient(PSip, "anonymous", "anonymous", PortNo)
+                    'Configurate the FTP connection
+                    conn.Config.EncryptionMode = FtpEncryptionMode.None
+                    conn.Config.SslProtocols = SslProtocols.None
+                    conn.Config.DataConnectionEncryption = False
+
+                    'Connect
+                    conn.Connect()
+                    'get users
+                    Me.Statlbl.Text = "Getting.. Game savedata "
+                    Me.Statlbl.ForeColor = Color.Green
+                    Dim Slocation As String = SAVETYPE()
+
+                    ' Get immediate subdirectories in /user/home/
+                    Dim directoryPath As String = "/user/home/" & Me.UserCmbBox.SelectedItem.ToString & "/" & Slocation
+
+                    Dim subdirectories() As FtpListItem = conn.GetListing(directoryPath, FtpListOption.Modify)
+
+                    ' Iterate through the array of items and add directory names to the ComboBox
+                    CmbSave.Items.Clear()
+                    CmbSave.Text = "Select Save Folder"
+                    For Each item As FtpListItem In subdirectories
+                        If item.Type = FtpObjectType.Directory Then
+                            'Console.WriteLine("Directory!  " & item.FullName)
+                            CmbSave.Items.Add(item.Name)
+                        End If
+                    Next
+
+                    SelectFirstItem(Me.CmbSave)
+                    constat = True
+                    'Disconnect
+                    conn.Disconnect()
+                    BtnDownload.Enabled = True
+                    BtnUpload.Enabled = True
+
+                    Me.Statlbl.Text = "Now Dowload Or Upload Saves "
+                End Using
+            Catch ex As Exception
+
+                MessageBox.Show("Error Code: " & Err.Number & vbNewLine & ex.Message, "Can't Fetch Saves", MessageBoxButtons.OK, MessageBoxIcon.Asterisk)
+
+            End Try
+
+        End If
+    End Sub
+    Sub SelectFirstItem(cmbox As ComboBox)
+        On Error Resume Next
+        If cmbox.Items.Count > 0 Then
+            cmbox.SelectedIndex = 0
+        End If
+    End Sub
+    Function SAVETYPE() As String
+        Dim sdataloc As String = ""
+        Try
+
+            'If Me.CmbPs45.SelectedItem IsNot Nothing Then
+            '    sdataloc = Me.CmbPs45.SelectedItem.ToString()
+            'Else
+            '    ' Handle missing selected item
+            '    Throw New Exception("Please Select Save Type!" & vbNewLine & "PS4 = Savedata" & vbNewLine & "PS5 = Savedata_prospero")
+            'End If
+            Select Case Me.CmbPs45.SelectedItem.ToString
+                Case "PS5"
+                    sdataloc = "savedata_prospero"
+                Case "PS4"
+                    sdataloc = "savedata"
+                Case Else
+                    sdataloc = ""
+
+            End Select
+
+
+
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
+        End Try
+        Return sdataloc
+    End Function
+
+    Sub ENDISBTN(T As Boolean)
+        On Error Resume Next
+        CmbPs45.Enabled = T
+        UserCmbBox.Enabled = T
+        CmbSave.Enabled = T
+        BtnDownload.Enabled = T
+        BtnUpload.Enabled = T
+        BtnDelete.Enabled = T
     End Sub
 End Class
