@@ -3,14 +3,12 @@
 
 "Save Transfer Wizard" is a versatile tool designed to streamline the process of transferring game saves between a PlayStation 5 console and a Windows PC. With its user-friendly interface and powerful features, it enables users to effortlessly copy, upload, and delete their game saves via FTP (File Transfer Protocol).
 
-This tool caters to a specific audience, particularly those who face challenges with their jailbroken PlayStation 5 lacking console activation, which can impede the seamless transfer of game saves. With the surge in popularity of PS4 FPKGs, Save Transfer Wizard bridges the gap, providing an effective solution for individuals looking to manage their game saves until more comprehensive methods like PSN patch or offline console activation become available.
-
-
 
 
 ## Features
 
-- Simple FTP tool
+- Decrypt Saves
+- FTP integrated
 - Can Transfer Saves Back & Forth
 - Browse & Upload Saves
 - Windows platform
@@ -18,17 +16,17 @@ This tool caters to a specific audience, particularly those who face challenges 
 ## Limitations
 
 - Works only on windows
-- Cant resign Saves
 - Require to enable FTP in console
-- Currently Fetches saves only from \Userprofile\home\savedata
-\Userprofile\home\savedata_Prospero
+
 
 
 ## Video Tutorial
-**https://youtu.be/bKDH_51VjG4**
+- [Youtube](https://youtu.be/bKDH_51VjG4)
+- [X Status](https://x.com/i/status/1865682027217039851)
 
 
-## How to Transfer ?
+
+## How to Transfer (Encrypted/Profile Saves)?
 ## Download Game Save
 
 - Enable FTP in PS5
@@ -58,6 +56,67 @@ This tool caters to a specific audience, particularly those who face challenges 
 - select save which you want to Delete 
 - click on Delete & confirm
 - Save will be Deleted
+
+Here's an improved and polished version of your GitHub README instructions:
+
+---
+
+## How to Transfer Decrypted Saves
+
+Follow these steps to transfer decrypted saves using the provided tool:
+
+1. **Enable FTP**  
+   Ensure that FTP is enabled on your PS5 console.
+
+2. **Load `ps5debug.elf`**  
+   Download and load [ps5debug.elf](https://github.com/idlesauce/ps5debug/releases) onto your PS5 environment.
+
+3. **Launch the Game**  
+   Boot the desired game on your PS5.
+
+4. **Enter Connection Details**  
+   Input the IP address and FTP port into the tool's connection settings.
+
+5. **Click Connect**  
+   Establish the connection by clicking the **Connect** button.
+
+6. **Select Save**  
+   The tool will automatically populate users and save data in the combo boxes. Select the desired save and click **Mount**.
+
+7. **Download Process**  
+   - Click the **Download/Upload** button to open the download window.  
+   - Select the mounted save folder and click **Download**.  
+   - The downloaded save will be saved to your **Desktop** and will automatically open once the process is finished.
+```bash
+  Desktop\SaveTransfer\Import\sandbox0
+```
+8. **Modify / Edit Save**  
+   Edit the downloaded save as needed, then click the **Upload** button to save your changes back.
+
+9. **Unmount the Save**  
+   Once you're done, click the **Unmount** button in the tool. *(Important step!)*
+
+10. **Reload the Game**  
+    Restart the game to apply the changes successfully.
+
+---
+
+### Notes:
+- Ensure `ps5debug.elf` is properly loaded and FTP is enabled before attempting these steps.  
+- Double-check that you are connecting to the correct IP and port.
+
+If you encounter any issues, check the repository's **Issues** section or consult the community.
+
+Happy Gaming! 🎮🚀
+
+
+
+## Authors
+
+- [@idlesauce](https://github.com/idlesauce/Playstation-4-Save-Mounter)
+- [@ChendoChap](https://github.com/ChendoChap/Playstation-4-Save-Mounter)
+
+
 
 <h1 align="center">About Me </h1>
 <h2 align="center">Hi 👋, I'm Rajesh</h2>
