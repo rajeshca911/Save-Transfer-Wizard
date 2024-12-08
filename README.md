@@ -1,4 +1,3 @@
-
 # Save Transfer Wizard
 
 "Save Transfer Wizard" is a versatile tool designed to streamline the process of transferring game saves between a PlayStation 5 console and a Windows PC. With its user-friendly interface and powerful features, it enables users to effortlessly copy, upload, and delete their game saves via FTP (File Transfer Protocol).
@@ -16,48 +15,13 @@
 ## Limitations
 
 - Works only on windows
-- Require to enable FTP,Debugging in console
+- Require to enable FTP in console
 
 
 
 ## Video Tutorial
 - [Youtube](https://youtu.be/bKDH_51VjG4)
 - [X Status](https://x.com/i/status/1865682027217039851)
-
-
-
-## How to Transfer (Encrypted/Profile Saves)?
-## Download Game Save
-
-- Enable FTP in PS5
-- Enter IP & Port No of Console
-- Click on 'Get Users'
-- Select User profile from the combo box
-- select save which you want to download 
-- click on download
-- Saves will be downloaded
-```bash
-  Desktop\SaveTransfer\Import
-```
-## Upload Game Save
-- Enable FTP in PS5
-- Enter IP & Port No of Console
-- Click on 'Get Users'
-- Select User profile
-- Click On Upload Button
-- Browse the folder and Upload
-
-## Delete Game Save
-
-- Enable FTP in PS5
-- Enter IP & Port No of Console
-- Click on 'Get Users'
-- Select User profile from the combo box
-- select save which you want to Delete 
-- click on Delete & confirm
-- Save will be Deleted
-
-Here's an improved and polished version of your GitHub README instructions:
 
 ---
 
@@ -101,6 +65,42 @@ Follow these steps to transfer decrypted saves using the provided tool:
 
 ---
 
+## How to Transfer (Encrypted/Profile Saves)?
+## Download Game Save
+
+- Enable FTP in PS5
+- Enter IP & Port No of Console
+- Click on 'Get Users'
+- Select User profile from the combo box
+- select save which you want to download 
+- click on download
+- Saves will be downloaded
+```bash
+  Desktop\SaveTransfer\Import
+```
+## Upload Game Save
+- Enable FTP in PS5
+- Enter IP & Port No of Console
+- Click on 'Get Users'
+- Select User profile
+- Click On Upload Button
+- Browse the folder and Upload
+
+## Delete Game Save
+
+- Enable FTP in PS5
+- Enter IP & Port No of Console
+- Click on 'Get Users'
+- Select User profile from the combo box
+- select save which you want to Delete 
+- click on Delete & confirm
+- Save will be Deleted
+
+
+
+---
+
+
 ### Notes:
 - Ensure `ps5debug.elf` is properly loaded and FTP is enabled before attempting these steps.  
 - Double-check that you are connecting to the correct IP and port.
@@ -115,6 +115,7 @@ Happy Gaming! 🎮🚀
 
 - [@idlesauce](https://github.com/idlesauce/Playstation-4-Save-Mounter)
 - [@ChendoChap](https://github.com/ChendoChap/Playstation-4-Save-Mounter)
+
 
 
 
