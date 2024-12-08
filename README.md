@@ -16,7 +16,7 @@
 ## Limitations
 
 - Works only on windows
-- Require to enable FTP in console
+- Require to enable FTP,Debugging in console
 
 
 
