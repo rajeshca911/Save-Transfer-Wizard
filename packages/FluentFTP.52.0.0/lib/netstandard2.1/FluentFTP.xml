@@ -201,7 +201,7 @@
             <param name="token">The token that can be used to cancel the entire process</param>
             <returns>True if the directory exists. False otherwise.</returns>
         </member>
-        <member name="M:FluentFTP.AsyncFtpClient.DisableUTF8">
+        <member name="M:FluentFTP.AsyncFtpClient.DisableUTF8(System.Threading.CancellationToken)">
             <summary>
             Disables UTF8 support and changes the Encoding property
             back to ASCII. If the server returns an error when trying
@@ -220,6 +220,7 @@
             </summary>
             <param name="command">The command to issue</param>
             <param name="maxTries">Maximum number of commands to issue</param>
+            <param name="token">Cancellation token</param>
             <returns>The detected command limit, 0 if infinite</returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.DownloadBytes(System.String,System.Int64,System.IProgress{FluentFTP.FtpProgress},System.Threading.CancellationToken,System.Int64)">
@@ -257,16 +258,15 @@
             <param name="remoteFolder">The full path of the remote FTP folder that you want to download. If it does not exist, an empty result list is returned.</param>
             <param name="mode">Mirror or Update mode, as explained above</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="rules">Only files and folders that pass all these rules are downloaded, and the files that don't pass are skipped. In the Mirror mode, the files that fail the rules are also deleted from the local folder.</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="token">The token that can be used to cancel the entire process</param>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically switch to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
             <returns>
             Returns a listing of all the remote files, indicating if they were downloaded, skipped or overwritten.
@@ -287,15 +287,16 @@
             <param name="localPath">The full or relative path to the file on the local file system</param>
             <param name="remotePath">The full or relative path to the file on the server</param>
             <param name="existsMode">Overwrite if you want the local file to be overwritten if it already exists. Append will also create a new file if it doesn't exists</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="progress">Provide an implementation of IProgress to track download progress.</param>
             <param name="token">The token that can be used to cancel the entire process</param>
-            <returns>FtpStatus flag indicating if the file was downloaded, skipped or failed to transfer.</returns>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically be set to true for subsequent attempts.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
+            <returns>FtpStatus flag indicating if the file was downloaded, skipped or failed to transfer.</returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.DownloadFileToFileAsync(System.String,System.String,FluentFTP.FtpLocalExists,FluentFTP.FtpVerify,System.IProgress{FluentFTP.FtpProgress},System.Threading.CancellationToken,FluentFTP.FtpProgress)">
             <summary>
@@ -323,22 +324,21 @@
             <param name="localDir">The full or relative path to the directory that files will be downloaded into.</param>
             <param name="remotePaths">The full or relative paths to the files on the server</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="errorHandling">Used to determine how errors are handled</param>
             <param name="token">The token that can be used to cancel the entire process</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="rules">Only files that pass all these rules are downloaded, and the files that don't pass are skipped.</param>
+            <remarks>
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
+            </remarks>
             <returns>
             Returns a listing of all the remote files, indicating if they were downloaded, skipped or overwritten.
             Returns a blank list if nothing was transferred. Never returns null.
             </returns>
-            <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically be set to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
-            </remarks>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.PurgeSuccessfulDownloads(System.Collections.Generic.IEnumerable{System.String})">
             <summary>
@@ -365,6 +365,7 @@
             </summary>
             <param name="uri">The uri of the item to download</param>
             <param name="progress">Provide a callback to track download progress.</param>
+            <param name="token">Cancellation token</param>
             <returns>A byte array containing the contents of the downloaded file if successful, otherwise null.</returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.EmptyDirectory(System.String,System.Threading.CancellationToken)">
@@ -395,12 +396,14 @@
             Things to do after executing a command
             </summary>
             <param name="command"></param>
+            <param name="token">Cancellation token</param>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.ExecuteDownloadText(System.String,System.Threading.CancellationToken)">
             <summary>
             Execute a custom FTP command and read the data channel to return its multiline output.
             </summary>
             <param name="command">The command to issue which produces output</param>
+            <param name="token">Cancellation token</param>
             <returns>A list of string objects corresponding to the multi-line response by the server</returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.ExecuteDownloadTextInternal(System.String,System.Boolean,System.Threading.CancellationToken)">
@@ -409,6 +412,7 @@
             </summary>
             <param name="command">The command to issue which produces output</param>
             <param name="retry">Retry the command execution on temporary failure?</param>
+            <param name="token">Cancellation token</param>
             <returns>A list of string objects corresponding to the multi-line response by the server</returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.FileExists(System.String,System.Threading.CancellationToken)">
@@ -596,7 +600,7 @@
             Return information about a remote file system object asynchronously.
             </summary>
             <remarks>
-            You should check the <see cref="P:FluentFTP.Client.BaseClient.BaseFtpClient.Capabilities"/> property for the <see cref="F:FluentFTP.FtpCapability.MLSD"/>
+            You should check the <see cref="P:FluentFTP.Client.BaseClient.BaseFtpClient.Capabilities"/> property for the <see cref="F:FluentFTP.FtpCapability.MLST"/>
             flag before calling this method. Failing to do so will result in an InvalidOperationException
             being thrown when the server does not support machine listings. Returns null if the server response can't
             be parsed or the server returns a failure completion code. The error for a failure
@@ -615,39 +619,6 @@
             and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
             </summary>
             <param name="token">The token that can be used to cancel the entire process.</param>
-            <returns>FtpReply representing the response from the server</returns>
-        </member>
-        <member name="M:FluentFTP.AsyncFtpClient.GetReplyAsyncInternal(System.Threading.CancellationToken,System.String)">
-            <summary>
-            Retrieves a reply from the server.
-            Support "normal" mode waiting for a command reply, subject to timeout exception
-            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
-            </summary>
-            <param name="token">The token that can be used to cancel the entire process.</param>
-            <param name="command">We are waiting for the response to which command?</param>
-            <returns>FtpReply representing the response from the server</returns>
-        </member>
-        <member name="M:FluentFTP.AsyncFtpClient.GetReplyAsyncInternal(System.Threading.CancellationToken,System.String,System.Boolean)">
-            <summary>
-            Retrieves a reply from the server.
-            Support "normal" mode waiting for a command reply, subject to timeout exception
-            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
-            </summary>
-            <param name="token">The token that can be used to cancel the entire process.</param>
-            <param name="command">We are waiting for the response to which command?</param>
-            <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
-            <returns>FtpReply representing the response from the server</returns>
-        </member>
-        <member name="M:FluentFTP.AsyncFtpClient.GetReplyAsyncInternal(System.Threading.CancellationToken,System.String,System.Boolean,System.Int32)">
-            <summary>
-            Retrieves a reply from the server.
-            Support "normal" mode waiting for a command reply, subject to timeout exception
-            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
-            </summary>
-            <param name="token">The token that can be used to cancel the entire process.</param>
-            <param name="command">We are waiting for the response to which command?</param>
-            <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
-            <param name="timeOut">-1 non-blocking, no timeout, >0 exhaustNoop mode, timeOut in seconds</param>
             <returns>FtpReply representing the response from the server</returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.GetWorkingDirectory(System.Threading.CancellationToken)">
@@ -680,6 +651,15 @@
             </summary>
             <returns>true if root.</returns>
         </member>
+        <member name="M:FluentFTP.AsyncFtpClient.IsStillConnected(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Performs a series of tests to check if we are still connected to the FTP server.
+            More thourough than IsConnected.
+            </summary>
+            <param name="timeout"/>How to wait for connection confirmation
+            <param name="token">Cancellation token</param>
+            <returns>bool connection status</returns>
+        </member>
         <member name="M:FluentFTP.AsyncFtpClient.MoveDirectory(System.String,System.String,FluentFTP.FtpRemoteExists,System.Threading.CancellationToken)">
             <summary>
             Moves a directory asynchronously on the remote file system from one directory to another.
@@ -704,12 +684,13 @@
             <param name="token">The token that can be used to cancel the entire process</param>
             <returns>Whether the file was moved</returns>
         </member>
-        <member name="M:FluentFTP.AsyncFtpClient.NoopAsync(System.Threading.CancellationToken)">
+        <member name="M:FluentFTP.AsyncFtpClient.Noop(System.Boolean,System.Threading.CancellationToken)">
             <summary>
             Sends the NOOP command according to <see cref="P:FluentFTP.FtpConfig.NoopInterval"/> (effectively a no-op if 0).
             Please call <see cref="M:FluentFTP.AsyncFtpClient.GetReply(System.Threading.CancellationToken)"/> as needed to read the "OK" command sent by the server and prevent stale data on the socket.
             Note that response is not guaranteed by all FTP servers when sent during file transfers.
             </summary>
+            <param name="ignoreNoopInterval"/>Send the command regardless of NoopInterval
             <param name="token"></param>
             <returns>true if NOOP command was sent</returns>
         </member>
@@ -820,8 +801,8 @@
             </summary>
             <param name="path"></param>
             <param name="type"></param>
-            <param name="restart"></param>
             <param name="fileLen"></param>
+            <param name="restart"></param>
             <param name="ignoreStaleData">Normally false. Obsolete API uses true</param>
             <param name="token">The token that can be used to cancel the entire process</param>
             <returns>A stream for reading the file on the server</returns>
@@ -941,16 +922,15 @@
             <param name="remoteFolder">The full or relative path to destination folder on the remote FTP Server</param>
             <param name="mode">Only Update mode is currently implemented</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="rules">Only files and folders that pass all these rules are downloaded, and the files that don't pass are skipped. In the Mirror mode, the files that fail the rules are also deleted from the local folder.</param>
             <param name="progress">Provide a callback to track download progress.</param>
             <param name="token">The token that can be used to cancel the entire process</param>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically switch to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
             <returns>
             Returns a listing of all the remote files, indicating if they were downloaded, skipped or overwritten.
@@ -977,16 +957,17 @@
             <param name="remotePath">The full or relative path to destination file on the remote FTP Server</param>
             <param name="createRemoteDir">Indicates if the folder should be created on the remote FTP Server</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="progress">Provide a callback to track download progress.</param>
             <param name="metaProgress"></param>
             <param name="token">The token that can be used to cancel the entire process</param>
-            Returns a FtpStatus indicating if the file was transferred.
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically be set to true for subsequent attempts.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
+            <returns> Returns a FtpStatus indicating if the file was transferred. </returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.TransferFileFXPInternal(System.String,FluentFTP.AsyncFtpClient,System.String,System.Boolean,FluentFTP.FtpRemoteExists,System.IProgress{FluentFTP.FtpProgress},System.Threading.CancellationToken,FluentFTP.FtpProgress)">
             <summary>
@@ -1020,16 +1001,15 @@
             <param name="remoteFolder">The full path of the remote FTP folder to upload into. It is created if it does not exist.</param>
             <param name="mode">Mirror or Update mode, as explained above</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the upload or restart the upload?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful upload and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="rules">Only files and folders that pass all these rules are uploaded, and the files that don't pass are skipped. In the Mirror mode, the files that fail the rules are also deleted from the local folder.</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="token">The token that can be used to cancel the entire process</param>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically switch to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
             <returns>
             Returns a listing of all the local files, indicating if they were uploaded, skipped or overwritten.
@@ -1062,15 +1042,16 @@
             <param name="existsMode">What to do if the file already exists? Skip, overwrite or append? Set this to  <see cref="F:FluentFTP.FtpRemoteExists.NoCheck"/> for fastest performance
              but only if you are SURE that the files do not exist on the server.</param>
             <param name="createRemoteDir">Create the remote directory if it does not exist. Slows down upload due to additional checks required.</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful upload and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="token">The token that can be used to cancel the entire process.</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
-            <returns>FtpStatus flag indicating if the file was uploaded, skipped or failed to transfer.</returns>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
+            <returns>FtpStatus flag indicating if the file was uploaded, skipped or failed to transfer.</returns>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.UploadFileFromFile(System.String,System.String,System.Boolean,FluentFTP.FtpRemoteExists,System.Boolean,System.Boolean,FluentFTP.FtpVerify,System.Threading.CancellationToken,System.IProgress{FluentFTP.FtpProgress},FluentFTP.FtpProgress)">
             <summary>
@@ -1101,22 +1082,21 @@
             <param name="existsMode">What to do if the file already exists? Skip, overwrite or append? Set this to <see cref="F:FluentFTP.FtpRemoteExists.NoCheck"/> for fastest performance,
              but only if you are SURE that the files do not exist on the server.</param>
             <param name="createRemoteDir">Create the remote directory if it does not exist.</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful upload and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="errorHandling">Used to determine how errors are handled</param>
             <param name="token">The token that can be used to cancel the entire process</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="rules">Only files that pass all these rules are uploaded, and the files that don't pass are skipped.</param>
+            <remarks>
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
+            </remarks>
             <returns>
             Returns a listing of all the local files, indicating if they were uploaded, skipped or overwritten.
             Returns a blank list if nothing was transferred. Never returns null.
             </returns>
-            <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
-            </remarks>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.PurgeSuccessfulUploadsAsync(System.Collections.Generic.IEnumerable{System.String})">
             <summary>
@@ -1136,22 +1116,21 @@
             <param name="existsMode">What to do if the file already exists? Skip, overwrite or append? Set this to <see cref="F:FluentFTP.FtpRemoteExists.NoCheck"/> for fastest performance,
              but only if you are SURE that the files do not exist on the server.</param>
             <param name="createRemoteDir">Create the remote directory if it does not exist.</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful upload and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions">Sets verification behaviour and what to do if verification fails (See Remarks)</param>
             <param name="errorHandling">Used to determine how errors are handled</param>
             <param name="token">The token that can be used to cancel the entire process</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="rules">Only files that pass all these rules are uploaded, and the files that don't pass are skipped.</param>
+            <remarks>
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
+            </remarks>
             <returns>
             Returns a listing of all the local files, indicating if they were uploaded, skipped or overwritten.
             Returns a blank list if nothing was transferred. Never returns null.
             </returns>
-            <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
-            </remarks>
         </member>
         <member name="M:FluentFTP.AsyncFtpClient.GetFilesToUpload2Async(System.Collections.Generic.IEnumerable{System.String},System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean},System.Threading.CancellationToken)">
             <summary>
@@ -1214,30 +1193,8 @@
             <summary>
             Creates a new instance of an async FTP Client, with the given host and credentials.
             </summary>
-        </member>
-        <member name="T:FluentFTP.Client.BaseClient.BaseFtpClient">
-            <summary>
-            The base object for FtpClient, AsyncFtpClient
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.CalculateAppendLocalPosition(System.String,FluentFTP.FtpRemoteExists,System.Int64)">
-            <summary>
-            Calculate the position from which to append
-            </summary>
-            <param name="remotePath"></param>
-            <param name="existsMode"></param>
-            <param name="remotePosition"></param>
-            <returns></returns>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.CalculateTransferChunkSize(System.Int64,System.Int32)">
-            <summary>
-            Calculate transfer chunk size taking rate control into account
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.CanUploadFile(FluentFTP.FtpResult,FluentFTP.FtpListItem[],FluentFTP.FtpRemoteExists,FluentFTP.FtpRemoteExists@)">
-            <summary>
-            Check if the file is cleared to be uploaded, taking its existence/filesize and existsMode options into account.
-            </summary>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="host"/> or <paramref name="credentials"/> are null</exception>
+            <exception cref="T:System.ArgumentException">Thrown if UserName field of <paramref name="credentials"/> is empty</exception>	"
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.CheckFileExistsBySize(FluentFTP.FtpSizeReply)">
             <summary>
@@ -1275,22 +1232,57 @@
             </summary>
             <param name="stream">The data stream to close</param>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.ConvertDate(System.DateTime,System.Boolean)">
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#CloseDataStreamInternal(FluentFTP.FtpDataStream,System.Threading.CancellationToken)">
             <summary>
-            If reverse is false, converts the date provided by the FTP server into the timezone required locally.
-            If reverse is true, converts the local timezone date into the date required by the FTP server.
-            
-            Affected by properties: TimeConversion, TimeZone, LocalTimeZone.
+            Disconnects a data stream
             </summary>
+            <param name="stream">The data stream to close</param>
+            <param name="token">Cancellation token</param>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#ConnectInternal(System.Boolean)">
+            <summary>
+            Connect to the server
+            </summary>
+            <param name="reConnect"> true indicates that we want a reconnect to take place.</param>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#ConnectInternal(System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Connect to the server
+            </summary>
+            <param name="reConnect"> true indicates that we want a reconnect to take place.</param>
+            <param name="token">The token that can be used to cancel the entire process</param>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.ConvertDate(System.DateTime,System.Boolean)">
+             <summary>
+             If `reverse` is false, converts the date provided by the FTP server into the timezone required locally.
+             If `reverse` is true, converts the local timezone date into the date required by the FTP server.
+            
+             Affected by properties: TimeConversion, ServerTimeZone, ClientTimeZone.
+             </summary>
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.DeleteExtraLocalFiles(System.String,FluentFTP.FtpFolderSyncMode,System.Collections.Generic.Dictionary{System.String,System.Boolean},System.Collections.Generic.List{FluentFTP.Rules.FtpRule})">
             <summary>
             Delete the extra local files if in mirror mode
             </summary>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.CanDeleteLocalFile(System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.String)">
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#DisconnectInternal">
             <summary>
-            Check if the local file can be deleted, based on the DownloadDirectoryDeleteExcluded property
+            Disconnects from the server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#DisconnectInternal(System.Threading.CancellationToken)">
+            <summary>
+            Disconnects from the server asynchronously
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#DisposeInternal">
+            <summary>
+            Disconnects from the server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#DisposeInternal(System.Threading.CancellationToken)">
+            <summary>
+            Disconnects from the server asynchronously
             </summary>
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#ExecuteInternal(System.String)">
@@ -1330,63 +1322,17 @@
             <param name="cap">The <see cref="T:FluentFTP.FtpCapability"/> to check for</param>
             <returns>True if the feature was found, false otherwise</returns>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FilePassesRules(FluentFTP.FtpResult,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Boolean,FluentFTP.FtpListItem)">
-            <summary>
-            Returns true if the file passes all the rules
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetFilesToDownload(System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},FluentFTP.FtpListItem[],System.Collections.Generic.Dictionary{System.String,System.Boolean})">
-            <summary>
-            Get a list of all the files and folders that need to be downloaded
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetFilesToDownload2(System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean})">
-            <summary>
-            Get a list of all the files and folders that need to be downloaded
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.RecordFileToDownload(System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean},System.Collections.Generic.List{FluentFTP.FtpResult},FluentFTP.FtpListItem,System.String,System.String)">
-            <summary>
-            Create an FtpResult object for the given file to be downloaded, and check if the file passes the rules.
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetFilesToUpload(System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean},System.String[])">
-            <summary>
-            Get a list of all the files that need to be uploaded within the main directory
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.RecordFileToUpload(System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean},System.Collections.Generic.List{FluentFTP.FtpResult},System.String,System.String)">
-            <summary>
-            Create an FtpResult object for the given file to be uploaded, and check if the file passes the rules.
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetEnhancedPassivePort(FluentFTP.FtpReply,System.String@,System.Int32@)">
-            <summary>
-            Parse the advertised port number from an EPSV response and derive an IPAD
-            Handles (|||nnnn|) and (!!!nnnn!)
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetPassivePort(FluentFTP.FtpDataConnectionType,FluentFTP.FtpReply,System.String@,System.Int32@)">
-            <summary>
-            Parse the advertised IPAD and advertised port number from a PASV response and derive the final IPAD
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetLocalAddress(System.Net.IPAddress)">
-            <summary>
-            Returns the IPAD to be sent to the server for the active connection.
-            </summary>
-            <param name="ipad"></param>
-            <returns></returns>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetReplyInternal">
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal">
             <summary>
             Retrieves a reply from the server.
             Support "normal" mode waiting for a command reply, subject to timeout exception
             and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
             </summary>
             <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetReplyInternal(System.String)">
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.String)">
             <summary>
             Retrieves a reply from the server.
             Support "normal" mode waiting for a command reply, subject to timeout exception
@@ -1394,8 +1340,10 @@
             </summary>
             <param name="command">We are waiting for the response to which command?</param>
             <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetReplyInternal(System.String,System.Boolean)">
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.String,System.Boolean)">
             <summary>
             Retrieves a reply from the server.
             Support "normal" mode waiting for a command reply, subject to timeout exception
@@ -1404,8 +1352,10 @@
             <param name="command">We are waiting for the response to which command?</param>
             <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
             <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetReplyInternal(System.String,System.Boolean,System.Int32)">
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.String,System.Boolean,System.Int32)">
             <summary>
             Retrieves a reply from the server.
             Support "normal" mode waiting for a command reply, subject to timeout exception
@@ -1415,6 +1365,87 @@
             <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
             <param name="timeOut">-1 non-blocking, no timeout, >0 exhaustNoop mode, timeOut in seconds</param>
             <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.String,System.Boolean,System.Int32,System.Boolean)">
+            <summary>
+            Retrieves a reply from the server.
+            Support "normal" mode waiting for a command reply, subject to timeout exception
+            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
+            </summary>
+            <param name="command">We are waiting for the response to which command?</param>
+            <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
+            <param name="timeOut">-1 non-blocking, no timeout, >0 exhaustNoop mode, timeOut in seconds</param>
+            <param name="useSema">Put a semaphore wait around the entire GetReply invocation</param>
+            <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a reply from the server.
+            Support "normal" mode waiting for a command reply, subject to timeout exception
+            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
+            </summary>
+            <param name="token">The token that can be used to cancel the entire process.</param>
+            <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.Threading.CancellationToken,System.String)">
+            <summary>
+            Retrieves a reply from the server.
+            Support "normal" mode waiting for a command reply, subject to timeout exception
+            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
+            </summary>
+            <param name="token">The token that can be used to cancel the entire process.</param>
+            <param name="command">We are waiting for the response to which command?</param>
+            <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.Threading.CancellationToken,System.String,System.Boolean)">
+            <summary>
+            Retrieves a reply from the server.
+            Support "normal" mode waiting for a command reply, subject to timeout exception
+            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
+            </summary>
+            <param name="token">The token that can be used to cancel the entire process.</param>
+            <param name="command">We are waiting for the response to which command?</param>
+            <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
+            <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.Threading.CancellationToken,System.String,System.Boolean,System.Int32)">
+            <summary>
+            Retrieves a reply from the server.
+            Support "normal" mode waiting for a command reply, subject to timeout exception
+            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
+            </summary>
+            <param name="token">The token that can be used to cancel the entire process.</param>
+            <param name="command">We are waiting for the response to which command?</param>
+            <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
+            <param name="timeOut">-1 non-blocking, no timeout, >0 exhaustNoop mode, timeOut in seconds</param>
+            <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetReplyInternal(System.Threading.CancellationToken,System.String,System.Boolean,System.Int32,System.Boolean)">
+            <summary>
+            Retrieves a reply from the server.
+            Support "normal" mode waiting for a command reply, subject to timeout exception
+            and "exhaustNoop" mode, which waits for 10 seconds to collect out of band NOOP responses
+            </summary>
+            <param name="token">The token that can be used to cancel the entire process.</param>
+            <param name="command">We are waiting for the response to which command?</param>
+            <param name="exhaustNoop">Set to true to select the NOOP devouring mode</param>
+            <param name="timeOut">-1 non-blocking, no timeout, >0 exhaustNoop mode, timeOut in seconds</param>
+            <param name="useSema">Put a semaphore wait around the entire GetReply invocation</param>
+            <returns>FtpReply representing the response from the server</returns>
+            <exception cref="T:System.TimeoutException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.ProcessGetReply(FluentFTP.FtpReply,System.String)">
             <summary>
@@ -1428,27 +1459,6 @@
             <summary>
             Decodes the given FTP response string into a FtpReply, separating the FTP return code and message.
             Returns true if the string was decoded correctly or false if it is not a standard format FTP response.
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetSubDirectoriesToTransfer(System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.String[])">
-            <summary>
-            Make a list of subdirectories to transfer
-            </summary>
-            <param name="sourceFolder"></param>
-            <param name="remoteFolder"></param>
-            <param name="rules"></param>
-            <param name="results"></param>
-            <param name="dirListing"></param>
-            <returns></returns>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetSubDirectoriesToUpload(System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.String[])">
-            <summary>
-            Get a list of all the sub directories that need to be created within the main directory
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.CanDeleteRemoteFile(System.Collections.Generic.List{FluentFTP.Rules.FtpRule},FluentFTP.FtpListItem)">
-            <summary>
-            Check if the remote file can be deleted, based on the UploadDirectoryDeleteExcluded property
             </summary>
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#GetWorkingDirectoryInternal">
@@ -1474,42 +1484,17 @@
             Checks if this FTP/FTPS connection is made through a proxy.
             </summary>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.WasGetListingRecursive(FluentFTP.FtpListOption)">
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#IsStillConnectedInternal(System.Int32)">
             <summary>
-            Checks whether <see cref="o:GetListing"/> will be called recursively or not.
+            Performs a series of tests to check if we are still connected to the FTP server.
+            More thourough than IsConnected.
             </summary>
-            <param name="options"></param>
-            <returns></returns>
+            <param name="timeout"/>How to wait for connection confirmation
+            <returns>bool connection status</returns>
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.LoadBasicListingInfo(System.String@,FluentFTP.FtpListItem@,System.Collections.Generic.List{FluentFTP.FtpListItem},System.Collections.Generic.List{System.String},System.Int32@,System.String,System.String,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
-            Get a listing
-            </summary>
-            <param name="path"></param>
-            <param name="item"></param>
-            <param name="lst"></param>
-            <param name="rawlisting"></param>
-            <param name="i"></param>
-            <param name="listcmd"></param>
-            <param name="buf"></param>
-            <param name="isRecursive"></param>
-            <param name="isIncludeSelf"></param>
-            <param name="machineList"></param>
-            <returns></returns>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.IsItemSelf(System.String,FluentFTP.FtpListItem)">
-            <summary>
-            
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.CalculateGetListingCommand(System.String,FluentFTP.FtpListOption,System.String@,System.Boolean@)">
-            <summary>
-            Determine which command to use for getting a listing
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.IsServerSideRecursionSupported(FluentFTP.FtpListOption)">
-            <summary>
-            Can the server do recursion for us?
+            Get the basic flags required for `GetListing`.
             </summary>
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.LoadProfile(FluentFTP.FtpProfile)">
@@ -1539,7 +1524,7 @@
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.Log(FluentFTP.FtpTraceLevel,System.String)">
             <summary>
-            Log a message
+            Log a raw message.
             </summary>
             <param name="eventType">The type of tracing event</param>
             <param name="message">The message to write</param>
@@ -1550,8 +1535,8 @@
             </summary>
             <param name="eventType">The type of tracing event</param>
             <param name="message">The message to write</param>
-            <param name="exception">An optional exeption</param>
-            <param name="exNewLine">Write an optional exeption on a new line</param>
+            <param name="exception">An optional exception</param>
+            <param name="exNewLine">Write the exception on a new line</param>
         </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.LogToDebugOrConsole(System.String)">
             <summary>
@@ -1566,6 +1551,20 @@
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#LogStatus(FluentFTP.FtpTraceLevel,System.String,System.Exception,System.Boolean)">
             <summary>
             To allow for external connected classes to use the attached logger.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.FluentFTP#IInternalFtpClient#NoopInternal(System.Boolean)">
+            <summary>
+            Sends the NOOP command according to <see cref="P:FluentFTP.FtpConfig.NoopInterval"/> (effectively a no-op if 0).
+            Please call GetReply() as needed to read the "OK" command sent by the server and prevent stale data on the socket.
+            Note that response is not guaranteed by all FTP servers when sent during file transfers.
+            <param name="ignoreNoopInterval"/>Send the command regardless of NoopInterval
+            </summary>
+            <returns>true if NOOP command was sent</returns>
+        </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.NoopDaemon(System.Threading.CancellationToken)">
+            <summary>
+            NoopDaemon for NOOP handling
             </summary>
         </member>
         <member name="P:FluentFTP.Client.BaseClient.BaseFtpClient.Logger">
@@ -1604,8 +1603,7 @@
         </member>
         <member name="F:FluentFTP.Client.BaseClient.BaseFtpClient.LastCommandTimestamp">
             <summary>
-            When last command was sent (NOOP or other), for having <see cref="M:FluentFTP.FtpClient.Noop"/>/<see cref="M:FluentFTP.AsyncFtpClient.NoopAsync(System.Threading.CancellationToken)"/>.
-            Respects the <see cref="P:FluentFTP.FtpConfig.NoopInterval"/>.
+            When last command was sent (NOOP or other)/>.
             </summary>
         </member>
         <member name="F:FluentFTP.Client.BaseClient.BaseFtpClient.LastCommandExecuted">
@@ -1623,15 +1621,10 @@
             Returns the current FTP client status flags. For advanced use only.
             </summary>
         </member>
-        <member name="F:FluentFTP.Client.BaseClient.BaseFtpClient.m_lock">
+        <member name="F:FluentFTP.Client.BaseClient.BaseFtpClient.m_daemonSemaphore">
             <summary>
             Used for internally synchronizing access to this
-            object from multiple threads
-            </summary>
-        </member>
-        <member name="P:FluentFTP.Client.BaseClient.BaseFtpClient.Lock">
-            <summary>
-            For usage by FTP proxies only
+            object from multiple threads in SYNC code
             </summary>
         </member>
         <member name="F:FluentFTP.Client.BaseClient.BaseFtpClient.m_stream">
@@ -1709,13 +1702,6 @@
             http://tools.ietf.org/html/draft-bryan-ftpext-hash-02
             </summary>
         </member>
-        <member name="P:FluentFTP.Client.BaseClient.BaseFtpClient.SslProtocolActive">
-            <summary>
-            The negotiated SSL/TLS protocol version.
-            Will return a valid value after connection is complete.
-            Before connection it will return `SslProtocols.None`.
-            </summary>
-        </member>
         <member name="P:FluentFTP.Client.BaseClient.BaseFtpClient.IsEncrypted">
             <summary>
             Checks if FTPS/SSL encryption is currently active.
@@ -1784,11 +1770,16 @@
             Returns the remote end point of the FTP socket, if it is available.
             </summary>
         </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.GetLocalAddress(System.Net.IPAddress)">
+            <summary>
+            Returns the IPAD to be sent to the server for the active connection.
+            </summary>
+        </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.ReadStaleData(System.String)">
             <summary>
             Data shouldn't be on the socket, if it is it probably means we've been disconnected.
             Read and discard whatever is there.
-            Returns the stale data as text, if any, or null if none was found.
+            Returns the stale data as text or string.empty, if any, or null if none was found.
             </summary>
             <param name="logFrom">for the log information</param>
         </member>
@@ -1796,7 +1787,7 @@
             <summary>
             Data shouldn't be on the socket, if it is it probably means we've been disconnected.
             Read and discard whatever is there.
-            Returns the stale data as text, if any, or null if none was found.
+            Returns the stale data as text or string.empty, if any, or null if none was found.
             </summary>
             <param name="logFrom">called from where (text)</param>
             <param name="token">The token that can be used to cancel the entire process</param>
@@ -1850,6 +1841,11 @@
             <exception cref="T:System.ArgumentException"></exception>
             <exception cref="T:FluentFTP.Exceptions.FtpException"></exception>
         </member>
+        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.Create">
+            <summary>
+            Creates a new instance of this class. Useful in FTP proxy classes.
+            </summary>
+        </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.Clone">
             <summary>
             Clones the FTP client control connection. Used for opening multiple data streams.
@@ -1862,26 +1858,10 @@
             Disposes and disconnects this FTP client if it was auto-created for an internal operation.
             </summary>
         </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.ValidateHost(System.Uri)">
-            <summary>
-            Check if the host parameter is valid
-            </summary>
-            <param name="host"></param>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.Create">
-            <summary>
-            Creates a new instance of this class. Useful in FTP proxy classes.
-            </summary>
-        </member>
         <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.Dispose">
             <summary>
             Disconnects from the server, releases resources held by this
             object.
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Client.BaseClient.BaseFtpClient.Finalize">
-            <summary>
-            Finalizer
             </summary>
         </member>
         <member name="T:FluentFTP.Client.Modules.ConnectModule">
@@ -1912,7 +1892,7 @@
             Check if the server refused to support one type of FTPS encryption, and if so blacklist that type of encryption.
             </summary>
         </member>
-        <member name="M:FluentFTP.Client.Modules.ConnectModule.IsPermanentConnectionFailure(System.Exception)">
+        <member name="M:FluentFTP.Client.Modules.ConnectModule.IsPermanentConnectionFailure(System.Exception,System.Boolean)">
             <summary>
             Check if its an auth failure or something permanent,
             so that we don't need to retry all the connection config combinations and can hard-abort the AutoConnect.
@@ -1929,20 +1909,121 @@
             Create a default ValidateCertificate handler that accepts valid certificates.
             </summary>
         </member>
-        <member name="M:FluentFTP.Client.Modules.ConnectModule.GetWorkingProfileFromHost(System.String,System.Collections.Generic.List{FluentFTP.FtpEncryptionMode}@)">
+        <member name="M:FluentFTP.Client.Modules.ConnectModule.GetWorkingProfileFromHost(System.String,System.Collections.Generic.List{FluentFTP.FtpEncryptionMode},System.Collections.Generic.List{FluentFTP.FtpEncryptionMode}@)">
             <summary>
             Return a known working connection profile from the host/port combination.
             </summary>
         </member>
-        <member name="M:FluentFTP.Client.Modules.ConnectModule.CheckCriticalSequence(FluentFTP.Client.BaseClient.BaseFtpClient,System.String)">
+        <member name="M:FluentFTP.Client.Modules.ConnectModule.CheckCriticalSingleCommand(FluentFTP.Client.BaseClient.BaseFtpClient,System.String)">
+            <summary>
+            A critical command will not be preceded by an automatic reconnect.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.ConnectModule.CheckCriticalCommandSequence(FluentFTP.Client.BaseClient.BaseFtpClient,System.String)">
             <summary>
             Modify the `Status.InCriticalSequence` flag based on the FTP command sent, by checking against a list of known critical commands.
             A critical sequence will not be interrupted by an automatic reconnect.
             </summary>
         </member>
+        <member name="M:FluentFTP.Client.Modules.DirectoryModule.GetSubDirectoriesToTransfer(FluentFTP.Client.BaseClient.BaseFtpClient,System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.String[])">
+            <summary>
+            Make a list of subdirectories to transfer.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.DirectoryModule.GetSubDirectoriesToUpload(FluentFTP.Client.BaseClient.BaseFtpClient,System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.String[])">
+            <summary>
+            Get a list of all the sub directories that need to be created within the main directory
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.DirectoryModule.CanDeleteRemoteFile(FluentFTP.Client.BaseClient.BaseFtpClient,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},FluentFTP.FtpListItem)">
+            <summary>
+            Check if the remote file can be deleted, based on the UploadDirectoryDeleteExcluded property
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileDownloadModule.GetFilesToDownload(FluentFTP.Client.BaseClient.BaseFtpClient,System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},FluentFTP.FtpListItem[],System.Collections.Generic.Dictionary{System.String,System.Boolean})">
+            <summary>
+            Get a list of all the files and folders that need to be downloaded
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileDownloadModule.GetFilesToDownload2(FluentFTP.Client.BaseClient.BaseFtpClient,System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean})">
+            <summary>
+            Get a list of all the files and folders that need to be downloaded
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileDownloadModule.RecordFileToDownload(FluentFTP.Client.BaseClient.BaseFtpClient,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean},System.Collections.Generic.List{FluentFTP.FtpResult},FluentFTP.FtpListItem,System.String,System.String)">
+            <summary>
+            Create an FtpResult object for the given file to be downloaded, and check if the file passes the rules.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileRuleModule.FilePassesRules(FluentFTP.Client.BaseClient.BaseFtpClient,FluentFTP.FtpResult,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Boolean,FluentFTP.FtpListItem)">
+            <summary>
+            Returns true if the file passes all the rules
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileRuleModule.CanDeleteLocalFile(FluentFTP.Client.BaseClient.BaseFtpClient,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.String)">
+            <summary>
+            Check if the local file can be deleted, based on the DownloadDirectoryDeleteExcluded property
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileTransferModule.CalculateAppendLocalPosition(System.String,FluentFTP.FtpRemoteExists,System.Int64)">
+            <summary>
+            Calculate the position from which to append.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileTransferModule.CalculateTransferChunkSize(FluentFTP.Client.BaseClient.BaseFtpClient,System.Int64,System.Int32)">
+            <summary>
+            Calculate transfer chunk size taking rate control into account
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileUploadModule.CanUploadFile(FluentFTP.Client.BaseClient.BaseFtpClient,FluentFTP.FtpResult,FluentFTP.FtpListItem[],FluentFTP.FtpRemoteExists,FluentFTP.FtpRemoteExists@)">
+            <summary>
+            Check if the file is cleared to be uploaded, taking its existence/filesize and existsMode options into account.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileUploadModule.GetFilesToUpload(FluentFTP.Client.BaseClient.BaseFtpClient,System.String,System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean},System.String[])">
+            <summary>
+            Get a list of all the files that need to be uploaded within the main directory
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.FileUploadModule.RecordFileToUpload(FluentFTP.Client.BaseClient.BaseFtpClient,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean},System.Collections.Generic.List{FluentFTP.FtpResult},System.String,System.String)">
+            <summary>
+            Create an FtpResult object for the given file to be uploaded, and check if the file passes the rules.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.ListingModule.WasGetListingRecursive(FluentFTP.FtpListOption)">
+            <summary>
+            Checks whether `GetListing` will be called recursively or not.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.ListingModule.IsItemSelf(System.String,FluentFTP.FtpListItem)">
+            <summary>
+            Checks if the folders are the same.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.ListingModule.CalculateGetListingCommand(FluentFTP.Client.BaseClient.BaseFtpClient,System.String,FluentFTP.FtpListOption,System.String@,System.Boolean@)">
+            <summary>
+            Determine which command to use for getting a listing
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.ListingModule.IsServerSideRecursionSupported(FluentFTP.Client.BaseClient.BaseFtpClient,FluentFTP.FtpListOption)">
+            <summary>
+            Can the server do recursion for us?
+            </summary>
+        </member>
         <member name="T:FluentFTP.Client.Modules.LogMaskModule">
             <summary>
             Class responsible for masking out sensitive data from FTP logs.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.PassivePortModule.GetEnhancedPassivePort(FluentFTP.Client.BaseClient.BaseFtpClient,FluentFTP.FtpReply,System.String@,System.Int32@)">
+            <summary>
+            Parse the advertised port number from an EPSV response and derive an IPAD
+            Handles (|||nnnn|) and (!!!nnnn!)
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Client.Modules.PassivePortModule.GetPassivePort(FluentFTP.Client.BaseClient.BaseFtpClient,FluentFTP.FtpDataConnectionType,FluentFTP.FtpReply,System.String@,System.Int32@)">
+            <summary>
+            Parse the advertised IPAD and advertised port number from a PASV response and derive the final IPAD
             </summary>
         </member>
         <member name="M:FluentFTP.Client.Modules.ServerFeatureModule.Detect(System.Collections.Generic.List{FluentFTP.FtpCapability},FluentFTP.FtpHashAlgorithm@,System.String[])">
@@ -2024,6 +2105,14 @@
             MUST BE LOWER CASE!
             </summary>
         </member>
+        <member name="M:FluentFTP.Client.Modules.TimezoneModule.ConvertDate(System.DateTime,FluentFTP.FtpConfig,System.Boolean)">
+             <summary>
+             If `reverse` is false, converts the date provided by the FTP server into the timezone required locally.
+             If `reverse` is true, converts the local timezone date into the date required by the FTP server.
+            
+             Affected by properties: TimeConversion, ServerTimeZone, ClientTimeZone.
+             </summary>
+        </member>
         <member name="T:FluentFTP.FtpClient">
             <summary>
             An FTP client that manages a connection to a single FTP server.
@@ -2052,6 +2141,8 @@
             <summary>
             Creates a new instance of a synchronous FTP Client, with the given host and credentials.
             </summary>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="host"/> or <paramref name="credentials"/> are null</exception>
+            <exception cref="T:System.ArgumentException">Thrown if UserName field of <paramref name="credentials"/> is empty</exception>	"
         </member>
         <member name="M:FluentFTP.FtpClient.Authenticate">
             <summary>
@@ -2271,15 +2362,14 @@
             <param name="remoteFolder">The full path of the remote FTP folder that you want to download. If it does not exist, an empty result list is returned.</param>
             <param name="mode">Mirror or Update mode, as explained above</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="rules">Only files and folders that pass all these rules are downloaded, and the files that don't pass are skipped. In the Mirror mode, the files that fail the rules are also deleted from the local folder.</param>
             <param name="progress">Provide a callback to track download progress.</param>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically switch to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
             <returns>
             Returns a listing of all the remote files, indicating if they were downloaded, skipped or overwritten.
@@ -2300,14 +2390,15 @@
             <param name="localPath">The full or relative path to the file on the local file system</param>
             <param name="remotePath">The full or relative path to the file on the server</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="progress">Provide a callback to track download progress.</param>
-            <returns>FtpStatus flag indicating if the file was downloaded, skipped or failed to transfer.</returns>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically be set to true for subsequent attempts.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
+            <returns>FtpStatus flag indicating if the file was downloaded, skipped or failed to transfer.</returns>
         </member>
         <member name="M:FluentFTP.FtpClient.DownloadFileToFile(System.String,System.String,FluentFTP.FtpLocalExists,FluentFTP.FtpVerify,System.Action{FluentFTP.FtpProgress},FluentFTP.FtpProgress)">
             <summary>
@@ -2344,21 +2435,20 @@
             <param name="localDir">The full or relative path to the directory that files will be downloaded into.</param>
             <param name="remotePaths">The full or relative paths to the files on the server</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="errorHandling">Used to determine how errors are handled</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="rules">Only files that pass all these rules are downloaded, and the files that don't pass are skipped.</param>
+            <remarks>
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
+            </remarks>
             <returns>
             Returns a listing of all the remote files, indicating if they were downloaded, skipped or overwritten.
             Returns a blank list if nothing was transferred. Never returns null.
             </returns>
-            <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically switch to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
-            </remarks>
         </member>
         <member name="M:FluentFTP.FtpClient.PurgeSuccessfulDownloads(System.Collections.Generic.IEnumerable{System.String})">
             <summary>
@@ -2456,7 +2546,7 @@
             5. XSHA512 command
             6. XCRC command
             </remarks>
-            <param name="path">Full or relative path of the file to checksum</param>
+            <param name="remotePath">Full or relative path of the file to checksum</param>
             <param name="algorithm">Specify an algorithm that you prefer, or NONE to use the first available algorithm. If the preferred algorithm is not supported, a blank hash is returned.</param>
             <returns><see cref="T:FluentFTP.FtpHash"/> object containing the value and algorithm. Use the <see cref="P:FluentFTP.FtpHash.IsValid"/> property to
             determine if this command was successful. <see cref="T:FluentFTP.Exceptions.FtpCommandException"/>s can be thrown from
@@ -2629,6 +2719,14 @@
             </summary>
             <returns>true if root.</returns>
         </member>
+        <member name="M:FluentFTP.FtpClient.IsStillConnected(System.Int32)">
+            <summary>
+            Performs a series of tests to check if we are still connected to the FTP server.
+            More thourough than IsConnected.
+            </summary>
+            <param name="timeout"/>How to wait for connection confirmation
+            <returns>bool connection status</returns>
+        </member>
         <member name="M:FluentFTP.FtpClient.MoveDirectory(System.String,System.String,FluentFTP.FtpRemoteExists)">
             <summary>
             Moves a directory on the remote file system from one directory to another.
@@ -2651,11 +2749,12 @@
             <param name="existsMode">Should we check if the dest file exists? And if it does should we overwrite/skip the operation?</param>
             <returns>Whether the file was moved</returns>
         </member>
-        <member name="M:FluentFTP.FtpClient.Noop">
+        <member name="M:FluentFTP.FtpClient.Noop(System.Boolean)">
             <summary>
             Sends the NOOP command according to <see cref="P:FluentFTP.FtpConfig.NoopInterval"/> (effectively a no-op if 0).
             Please call <see cref="M:FluentFTP.FtpClient.GetReply"/> as needed to read the "OK" command sent by the server and prevent stale data on the socket.
             Note that response is not guaranteed by all FTP servers when sent during file transfers.
+            <param name="ignoreNoopInterval"/>Send the command regardless of NoopInterval
             </summary>
             <returns>true if NOOP command was sent</returns>
         </member>
@@ -2757,8 +2856,8 @@
             </summary>
             <param name="path"></param>
             <param name="type"></param>
-            <param name="restart"></param>
             <param name="fileLen"></param>
+            <param name="restart"></param>
             <param name="ignoreStaleData">Normally false. Obsolete API uses true</param>
             <returns>A stream for reading the file on the server</returns>
         </member>
@@ -2805,13 +2904,7 @@
             <param name="dest">The new full or relative path including the new name of the object</param>
         </member>
         <member name="M:FluentFTP.FtpClient.SetDataType(FluentFTP.FtpDataType)">
-            <summary>
             Sets the data type of information sent over the data stream
-            </summary>
-            <param name="type">ASCII/Binary</param>
-        </member>
-        <member name="M:FluentFTP.FtpClient.SetDataTypeNoLock(FluentFTP.FtpDataType)">
-            <summary>Internal method that handles actually setting the data type.</summary>
             <exception cref="T:FluentFTP.Exceptions.FtpCommandException">Thrown when a FTP Command error condition occurs.</exception>
             <exception cref="T:FluentFTP.Exceptions.FtpException">Thrown when a FTP error condition occurs.</exception>
             <param name="type">ASCII/Binary.</param>
@@ -2868,15 +2961,14 @@
             <param name="remoteFolder">The full or relative path to destination folder on the remote FTP Server</param>
             <param name="mode">Only Update mode is currently implemented</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="rules">Only files and folders that pass all these rules are downloaded, and the files that don't pass are skipped. In the Mirror mode, the files that fail the rules are also deleted from the local folder.</param>
             <param name="progress">Provide a callback to track download progress.</param>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically switch to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
             <returns>
             Returns a listing of all the remote files, indicating if they were downloaded, skipped or overwritten.
@@ -2909,15 +3001,16 @@
             <param name="remotePath">The full or relative path to destination file on the remote FTP Server</param>
             <param name="createRemoteDir">Indicates if the folder should be created on the remote FTP Server</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the download or restart the download?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful download and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="progress">Provide a callback to track download progress.</param>
             <param name="metaProgress"></param>
-            Returns a FtpStatus indicating if the file was transferred.
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically be set to true for subsequent attempts.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
+            <returns>Returns a FtpStatus indicating if the file was transferred.</returns>
         </member>
         <member name="M:FluentFTP.FtpClient.TransferFileFXPInternal(System.String,FluentFTP.FtpClient,System.String,System.Boolean,FluentFTP.FtpRemoteExists,System.Action{FluentFTP.FtpProgress},FluentFTP.FtpProgress)">
             <summary>
@@ -2949,15 +3042,14 @@
             <param name="remoteFolder">The full path of the remote FTP folder to upload into. It is created if it does not exist.</param>
             <param name="mode">Mirror or Update mode, as explained above</param>
             <param name="existsMode">If the file exists on disk, should we skip it, resume the upload or restart the upload?</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful upload and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="rules">Only files and folders that pass all these rules are downloaded, and the files that don't pass are skipped. In the Mirror mode, the files that fail the rules are also deleted from the local folder.</param>
             <param name="progress">Provide a callback to track upload progress.</param>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted then overwrite will automatically switch to true for subsequent attempts.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
             <returns>
             Returns a listing of all the remote files, indicating if they were downloaded, skipped or overwritten.
@@ -2990,14 +3082,15 @@
             <param name="existsMode">What to do if the file already exists? Skip, overwrite or append? Set this to  <see cref="F:FluentFTP.FtpRemoteExists.NoCheck"/> for fastest performance 
             but only if you are SURE that the files do not exist on the server.</param>
             <param name="createRemoteDir">Create the remote directory if it does not exist. Slows down upload due to additional checks required.</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful upload and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="progress">Provide a callback to track download progress.</param>
-            <returns>FtpStatus flag indicating if the file was uploaded, skipped or failed to transfer.</returns>
             <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
             </remarks>
+            <returns>FtpStatus flag indicating if the file was uploaded, skipped or failed to transfer.</returns>
         </member>
         <member name="M:FluentFTP.FtpClient.UploadFileFromFile(System.String,System.String,System.Boolean,FluentFTP.FtpRemoteExists,System.Boolean,System.Boolean,FluentFTP.FtpVerify,System.Action{FluentFTP.FtpProgress},FluentFTP.FtpProgress)">
             <summary>
@@ -3039,21 +3132,20 @@
             <param name="existsMode">What to do if the file already exists? Skip, overwrite or append? Set this to <see cref="F:FluentFTP.FtpRemoteExists.NoCheck"/> for fastest performance,
              but only if you are SURE that the files do not exist on the server.</param>
             <param name="createRemoteDir">Create the remote directory if it does not exist.</param>
-            <param name="verifyOptions">Sets if checksum verification is required for a successful upload and what to do if it fails verification (See Remarks)</param>
+            <param name="verifyOptions"> Sets verification type and what to do if verification fails (See Remarks)</param>
             <param name="errorHandling">Used to determine how errors are handled</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="rules">Only files that pass all these rules are uploaded, and the files that don't pass are skipped.</param>
+            <remarks>
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
+            </remarks>
             <returns>
             Returns a listing of all the local files, indicating if they were uploaded, skipped or overwritten.
             Returns a blank list if nothing was transferred. Never returns null.
             </returns>
-            <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
-            </remarks>
         </member>
         <member name="M:FluentFTP.FtpClient.PurgeSuccessfulUploads(System.Collections.Generic.IEnumerable{System.String})">
             <summary>
@@ -3077,17 +3169,16 @@
             <param name="errorHandling">Used to determine how errors are handled</param>
             <param name="progress">Provide an implementation of IProgress to track upload progress.</param>
             <param name="rules">Only files that pass all these rules are uploaded, and the files that don't pass are skipped.</param>
+            <remarks>
+            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the file will be verified against the source using the verification methods specified by <see cref="T:FluentFTP.FtpVerifyMethod"/> in the client config.
+            <br/> If only <see cref="F:FluentFTP.FtpVerify.OnlyVerify"/> is set then the return of this method depends on both a successful transfer &amp; verification.
+            <br/> Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
+            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception to propagate from this method.
+            </remarks>
             <returns>
             Returns a listing of all the local files, indicating if they were uploaded, skipped or overwritten.
             Returns a blank list if nothing was transferred. Never returns null.
             </returns>
-            <remarks>
-            If verification is enabled (All options other than <see cref="F:FluentFTP.FtpVerify.None"/>) the hash will be checked against the server.  If the server does not support
-            any hash algorithm, then verification is ignored.  If only <see cref="F:FluentFTP.FtpVerify.OnlyChecksum"/> is set then the return of this method depends on both a successful 
-            upload &amp; verification.  Additionally, if any verify option is set and a retry is attempted the existsMode will automatically be set to <see cref="F:FluentFTP.FtpRemoteExists.Overwrite"/>.
-            If <see cref="F:FluentFTP.FtpVerify.Throw"/> is set and <see cref="F:FluentFTP.FtpError.Throw"/> is <i>not set</i>, then individual verification errors will not cause an exception
-            to propagate from this method.
-            </remarks>
         </member>
         <member name="M:FluentFTP.FtpClient.GetFilesToUpload2(System.Collections.Generic.IEnumerable{System.String},System.String,System.Collections.Generic.List{FluentFTP.Rules.FtpRule},System.Collections.Generic.List{FluentFTP.FtpResult},System.Collections.Generic.Dictionary{System.String,System.Boolean})">
             <summary>
@@ -3134,14 +3225,24 @@
             </summary>
         </member>
         <member name="T:FluentFTP.CustomRemoteCertificateValidationCallback">
-             <summary>
-             Base object for FtpClient, AsyncFtpClient and the internal client
-             </summary>
-            
+            <summary>
+            Callback for any custom streams to handle certificate validation
+            </summary>
+        </member>
+        <member name="T:FluentFTP.IBaseFtpClient">
+            <summary>
+            Base object for FtpClient, AsyncFtpClient and the internal client
+            </summary>
         </member>
         <member name="T:FluentFTP.IFtpClient">
             <summary>
             Interface for the FtpClient class.
+            For detailed documentation of the methods, please see the FtpClient class or check the Wiki on the FluentFTP Github project.
+            </summary>
+        </member>
+        <member name="T:FluentFTP.IInternalFtpClient">
+            <summary>
+            Interface for the InternalFtpClient class.
             For detailed documentation of the methods, please see the FtpClient class or check the Wiki on the FluentFTP Github project.
             </summary>
         </member>
@@ -3155,7 +3256,7 @@
             This server said it doesn't support anything!
             </summary>
         </member>
-        <member name="F:FluentFTP.FtpCapability.MLSD">
+        <member name="F:FluentFTP.FtpCapability.MLST">
             <summary>
             Supports the MLST command (machine listings)
             </summary>
@@ -3388,6 +3489,31 @@
             Failure. Checksum verification is enabled and your server does not support any hash algorithm.
             </summary>
         </member>
+        <member name="T:FluentFTP.FtpConnectionState">
+            <summary>
+            Actual connection state from the FTP client to the FTP server, as determined by the NOOP Deamon.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpConnectionState.Unknown">
+            <summary>
+            Unknown state. NOOP Deamon will determine the state in a short while.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpConnectionState.PendingDisconnect">
+            <summary>
+            Not a good state and it will be brought down, closed and disposed soon.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpConnectionState.Disconnected">
+            <summary>
+            Closed and disposed.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpConnectionState.Connected">
+            <summary>
+            Connected to the FTP server, at least the last time the NOOP daemon checked the connection.
+            </summary>
+        </member>
         <member name="T:FluentFTP.FtpDataConnectionType">
              <summary>
              Data connection type
@@ -3527,14 +3653,14 @@
         <member name="F:FluentFTP.FtpDate.LocalTime">
             <summary>
             Returns the server timestamps in Local Time.
-            Ensure that the TimeZone property is correctly set to the server's timezone.
-            If you are on .NET Core/.NET Standard, you need to set the LocalTimeZone property for this to work.
+            Ensure that the `ServerTimeZone` property is set to the server's timezone.
+            Ensure that the `ClientTimeZone` property is set to the client's timezone.
             </summary>
         </member>
         <member name="F:FluentFTP.FtpDate.UTC">
             <summary>
             Returns the server timestamps in UTC (Coordinated Universal Time).
-            Ensure that the TimeZone property is correctly set to the server's timezone.
+            Ensure that the `ServerTimeZone` property is correctly set to the server's timezone.
             </summary>
         </member>
         <member name="T:FluentFTP.FtpEncryptionMode">
@@ -3689,7 +3815,7 @@
             <summary>
             Load the modify date using MDTM when it could not
             be parsed from the server listing. This only pertains
-            to servers that do not implement the MLSD command.
+            to servers that do not implement the MLST command.
             </summary>
         </member>
         <member name="F:FluentFTP.FtpListOption.Size">
@@ -3697,7 +3823,7 @@
             Load the file size using the SIZE command when it
             could not be parsed from the server listing. This
             only pertains to servers that do not support the
-            MLSD command.
+            MLST command.
             </summary>
         </member>
         <member name="F:FluentFTP.FtpListOption.SizeModify">
@@ -3708,10 +3834,10 @@
         <member name="F:FluentFTP.FtpListOption.AllFiles">
             <summary>
             Show hidden/dot files. This only pertains to servers
-            that do not support the MLSD command. This option
+            that do not support the MLST command. This option
             makes use the non standard -a parameter to LIST to
             tell the server to show hidden files. Since it's a
-            non-standard option it may not always work. MLSD listings
+            non-standard option it may not always work. MLST listings
             have no such option and whether or not a hidden file is
             shown is at the discretion of the server.
             </summary>
@@ -3719,7 +3845,7 @@
         <member name="F:FluentFTP.FtpListOption.ForceList">
             <summary>
             Force the use of OS-specific listings (LIST command) even if
-            machine listings (MLSD command) are supported by the server
+            machine listings (MLST command) are supported by the server
             </summary>
         </member>
         <member name="F:FluentFTP.FtpListOption.NameList">
@@ -4085,7 +4211,15 @@
         </member>
         <member name="F:FluentFTP.FtpRemoteExists.Overwrite">
             <summary>
-            Overwrite the file if it exists.
+            Overwrite the file if it exists. This will delete the file if it exists, and then perform a fresh upload.
+            It is most reliable way of performing an overwrite and supported on all FTP servers.
+            If you want direct overwriting, use `OverwriteInPlace`.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpRemoteExists.OverwriteInPlace">
+            <summary>
+            Overwrite the file if it exists, by directly copying the file data over the previous file.
+            This mode retains file permissions on the FTP server, which are otherwise lost when using the `Overwrite` mode.
             </summary>
         </member>
         <member name="F:FluentFTP.FtpRemoteExists.Resume">
@@ -4443,8 +4577,38 @@
         </member>
         <member name="F:FluentFTP.FtpVerify.OnlyChecksum">
             <summary>
-            The checksum of the file is verified, if supported by the server.
-            If the checksum comparison fails then the method returns false and no other action is taken.
+            OnlyChecksum is now renamed to OnlyVerify.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpVerify.OnlyVerify">
+            <summary>
+            The file is only verified. If no verification type is specified, checksum is used.
+            If the comparison fails, the method returns false and no further action is taken.
+            </summary>
+        </member>
+        <member name="T:FluentFTP.FtpVerifyMethod">
+            <summary>
+            Defines which verification types should be performed when 
+            uploading/downloading files using the high-level APIs.
+            Multiple verification types can be combined.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpVerifyMethod.Size">
+            <summary>
+            Compares the file size.
+            Both file sizes should exactly match for the file to be considered equal.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpVerifyMethod.Date">
+            <summary>
+            Compares the date modified of the file.
+            Both dates should exactly match for the file to be considered equal.
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpVerifyMethod.Checksum">
+            <summary>
+            Compares the checksum or hash of the file using the first supported hash algorithm.
+            Both checksums should exactly match for the file to be considered equal.
             </summary>
         </member>
         <member name="T:FluentFTP.FtpZOSListRealm">
@@ -4480,6 +4644,32 @@
         <member name="F:FluentFTP.FtpZOSListRealm.Jes2">
             <summary>
             SITE FILETYPE=JES LIST
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:FluentFTP.FtpMonitorEventArgs.Added" -->
+        <member name="P:FluentFTP.FtpMonitorEventArgs.Changed">
+            <summary>
+            Gets the files that are changed (when the file size changes).
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpMonitorEventArgs.Deleted">
+            <summary>
+            Gets the files that were deleted (if a file is missing, which existed on the server before)
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpMonitorEventArgs.AsyncFtpClient">
+            <summary>
+            Gets the active FTP client when using the async monitor.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpMonitorEventArgs.FtpClient">
+            <summary>
+            Gets the active FTP client when using the synchronous monitor.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpMonitorEventArgs.CancellationToken">
+            <summary>
+            The cancellation token for closing the monitor (async monitor only).
             </summary>
         </member>
         <member name="T:FluentFTP.FtpSocketStreamSslValidation">
@@ -4547,11 +4737,6 @@
             </summary>
             <param name="reply">The FtpReply to build the exception from</param>
         </member>
-        <member name="M:FluentFTP.Exceptions.FtpAuthenticationException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
-            </summary>
-        </member>
         <member name="T:FluentFTP.Exceptions.FtpCommandException">
             <summary>
             Exception triggered on FTP command failures
@@ -4585,11 +4770,6 @@
             </summary>
             <param name="reply">The FtpReply to build the exception from</param>
         </member>
-        <member name="M:FluentFTP.Exceptions.FtpCommandException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
-            </summary>
-        </member>
         <member name="T:FluentFTP.Exceptions.FtpException">
             <summary>
             FTP related error
@@ -4607,11 +4787,6 @@
             </summary>
             <param name="message">The error message that explains the reason for the exception.</param>
             <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
-        </member>
-        <member name="M:FluentFTP.Exceptions.FtpException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
-            </summary>
         </member>
         <member name="T:FluentFTP.Exceptions.FtpHashUnsupportedException">
             <summary>
@@ -4631,11 +4806,6 @@
         <member name="M:FluentFTP.Exceptions.FtpHashUnsupportedException.#ctor(FluentFTP.FtpHashAlgorithm,System.String)">
             <summary>
             Algorithm-specific constructor
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Exceptions.FtpHashUnsupportedException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
             </summary>
         </member>
         <member name="T:FluentFTP.Exceptions.FtpInvalidCertificateException">
@@ -4659,11 +4829,6 @@
             </summary>
             <param name="message">Error message</param>
         </member>
-        <member name="M:FluentFTP.Exceptions.FtpInvalidCertificateException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
-            </summary>
-        </member>
         <member name="T:FluentFTP.Exceptions.FtpListParseException">
             <summary>
             Exception thrown by FtpListParser when parsing of FTP directory listing fails.
@@ -4672,11 +4837,6 @@
         <member name="M:FluentFTP.Exceptions.FtpListParseException.#ctor">
             <summary>
             Creates a new FtpListParseException.
-            </summary>
-        </member>
-        <member name="M:FluentFTP.Exceptions.FtpListParseException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
             </summary>
         </member>
         <member name="T:FluentFTP.Exceptions.FtpMissingObjectException">
@@ -4703,12 +4863,10 @@
             <summary>
             Creates a new FtpMissingObjectException.
             </summary>
+            <param name="message">The message text.</param>
             <param name="innerException">The original exception.</param>
-        </member>
-        <member name="M:FluentFTP.Exceptions.FtpMissingObjectException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
-            </summary>
+            <param name="fullPath">The path/filename.</param>
+            <param name="type">The object type.</param>
         </member>
         <member name="T:FluentFTP.Exceptions.FtpMissingSocketException">
             <summary>
@@ -4720,11 +4878,6 @@
             Creates a new FtpMissingSocketException.
             </summary>
             <param name="innerException">The original exception.</param>
-        </member>
-        <member name="M:FluentFTP.Exceptions.FtpMissingSocketException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
-            </summary>
         </member>
         <member name="T:FluentFTP.Exceptions.FtpProtocolUnsupportedException">
             <summary>
@@ -4773,11 +4926,6 @@
             </summary>
             <param name="message">Error message</param>
         </member>
-        <member name="M:FluentFTP.Exceptions.FtpSecurityNotAvailableException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Must be implemented so every Serializer can Deserialize the Exception
-            </summary>
-        </member>
         <member name="T:FluentFTP.Exceptions.IOExceptions">
             <summary>
             Extension methods related to FTP tasks
@@ -4825,13 +4973,14 @@
             Extension methods related to FTP date time values
             </summary>
         </member>
-        <member name="M:FluentFTP.Helpers.DateTimes.ParseFtpDate(System.String,FluentFTP.Client.BaseClient.BaseFtpClient,System.String[])">
+        <member name="M:FluentFTP.Helpers.DateTimes.ParseFtpDate(System.String,FluentFTP.Client.BaseClient.BaseFtpClient,System.String[],System.Globalization.DateTimeStyles)">
             <summary>
             Converts the FTP date string into a DateTime object, without performing any timezone conversion.
             </summary>
             <param name="dateString">The date string</param>
             <param name="client">The client object this is done for</param>
             <param name="formats">Date formats to try parsing the value from (eg "yyyyMMddHHmmss")</param>
+            <param name="styles">The <see cref="T:System.Globalization.DateTimeStyles"/> used when parsing</param>
             <returns>A <see cref="T:System.DateTime"/> object representing the date, or <see cref="F:System.DateTime.MinValue"/> if there was a problem</returns>
         </member>
         <member name="M:FluentFTP.Helpers.DateTimes.GenerateFtpDate(System.DateTime)">
@@ -4861,6 +5010,11 @@
         <member name="M:FluentFTP.Helpers.Enums.IsSuccess(FluentFTP.FtpStatus)">
             <summary>
             Checks if the operation was successful or skipped (indicating success).
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Helpers.Enums.IsSkipped(FluentFTP.FtpStatus)">
+            <summary>
+            Checks if the operation was skipped (specifically).
             </summary>
         </member>
         <member name="M:FluentFTP.Helpers.Enums.IsFailure(FluentFTP.FtpStatus)">
@@ -5576,6 +5730,31 @@
             The value is used internally to calculate member sizes
             </summary>
         </member>
+        <member name="P:FluentFTP.FtpClientState.NoopDaemonTask">
+            <summary>
+            NOOP Daemon Task
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpClientState.NoopDaemonTokenSource">
+            <summary>
+            NOOP Daemon TokenSource
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpClientState.NoopDaemonEnable">
+            <summary>
+            NOOP Daemon enabled
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpClientState.NoopDaemonAnyNoops">
+            <summary>
+            NOOP Daemon sent noops
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpClientState.NoopDaemonCmdMode">
+            <summary>
+            NOOP Daemon should GetReply
+            </summary>
+        </member>
         <member name="T:FluentFTP.FtpConfig">
             <summary>
             Holds all the configuration settings for a single FTP client.
@@ -5610,7 +5789,7 @@
         </member>
         <member name="P:FluentFTP.FtpConfig.LogDurations">
             <summary>
-            Should the command duration be shown after each log command?
+            Should the command duration be shown after each logged command?
             </summary>
         </member>
         <member name="P:FluentFTP.FtpConfig.InternetProtocolVersions">
@@ -5624,18 +5803,6 @@
             ignore IPv6 addresses. The default value is ANY version.
             </summary>
         </member>
-        <member name="P:FluentFTP.FtpConfig.SocketPollInterval">
-            <summary>
-            Gets or sets the length of time in milliseconds
-            that must pass since the last socket activity
-            before calling <see cref="M:System.Net.Sockets.Socket.Poll(System.Int32,System.Net.Sockets.SelectMode)"/> 
-            on the socket to test for connectivity. 
-            Setting this interval too low will
-            have a negative impact on performance. Setting this
-            interval to 0 disables Polling all together.
-            The default value is 15 seconds.
-            </summary>
-        </member>
         <member name="P:FluentFTP.FtpConfig.StaleDataCheck">
             <summary>
             Gets or sets a value indicating whether a test should be performed to
@@ -5647,13 +5814,47 @@
             available on the socket before executing a command.
             </summary>
         </member>
+        <member name="P:FluentFTP.FtpConfig.Noop">
+            <summary>
+            Install the NOOP Daemon whenever an FTP connection is established,
+            which enables the capability to send NOOP commands at regular intervals when
+            the control connections is inactive longer than a set time.
+            This is the master switch for all NOOP related functionality.
+            </summary>
+        </member>
         <member name="P:FluentFTP.FtpConfig.NoopInterval">
             <summary>
-            Gets or sets the length of time in milliseconds after last command
-            (NOOP or other) that a NOOP command is sent by <see cref="M:FluentFTP.FtpClient.Noop"/>/<see cref="M:FluentFTP.AsyncFtpClient.NoopAsync(System.Threading.CancellationToken)"/>.
-            This is called during downloading/uploading. Setting this
-            interval to 0 disables <see cref="M:FluentFTP.FtpClient.Noop"/>/<see cref="M:FluentFTP.AsyncFtpClient.NoopAsync(System.Threading.CancellationToken)"/> all together.
-            The default value is 0 (disabled).
+            Gets or sets the length of time in milliseconds of inactivity on the control
+            connection that must expire before a NOOP command is sent, both during downloading/uploading
+            and during idle times. Setting this interval to 0 stops NOOPs from being issued.
+            The default value is 4:30 minutes, which defeats the typical 5 minute timeout of popular FTP
+            servers.
+            If you are interested in very aggressive detection of connection failures, you may set
+            this value to as low as 1000ms.
+            Note that many servers nowadays implement a "No-files-transferred" timeout, in order to thwart
+            a users attempts to keep the control connection alive. In such a case your code would need to
+            schedule a small dummy file transfer from time to time to avoid such a timeout from triggering.
+            Regular NOOP commands will not help when your FTP server uses such a strategy.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpConfig.NoopInactiveCommands">
+            <summary>
+            These commands are to be used when the dataconnection is not active, i.e. no transfer
+            is taking place. Default: NOOP, PWD, TYPE I, TYPE A
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpConfig.NoopActiveCommands">
+            <summary>
+            These commands are to be used when the dataconnection is active, i.e. a transfer
+            is taking place. Default: NOOP
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpConfig.NoopTestConnectivity">
+            <summary>
+            Issue a NOOP command to precede any command issued on the control connection
+            to test connectivity in a reliable fashion. Note: This can incur some control
+            connection overhead and does not alleviate inactivity timeouts, it just helps
+            to identify connectivity issues early on.
             </summary>
         </member>
         <member name="P:FluentFTP.FtpConfig.CheckCapabilities">
@@ -5764,13 +5965,6 @@
             Default value is .NET Framework defaults from the <see cref="T:System.Net.Security.SslStream"/> class.
             </summary>
         </member>
-        <member name="P:FluentFTP.FtpConfig.SslBuffering">
-            <summary>
-            Whether to use SSL Buffering to speed up data transfer during FTP operations.
-            SSL Buffering is always disabled on .NET 5.0 and later due to platform issues (see issue 682 in FluentFTP issue tracker).
-            Also disabled on the control connection, for proxy connections and if NOOPs are configured to be used
-            </summary>
-        </member>
         <member name="P:FluentFTP.FtpConfig.SslSessionLength">
             <summary>
             Gets or sets the max number of socket write/read transactions
@@ -5832,19 +6026,27 @@
             <param name="client">The FTP client</param>
             <returns>Return an FtpListItem object if the line can be parsed, else return null</returns>
         </member>
-        <member name="P:FluentFTP.FtpConfig.TimeZone">
-            <summary>
-            The timezone of the FTP server. If the server is in Tokyo with UTC+9 then set this to 9.
-            If the server returns timestamps in UTC then keep this 0.
-            </summary>
-        </member>
         <member name="P:FluentFTP.FtpConfig.TimeConversion">
             <summary>
-            Server timestamps are converted into the given timezone.
-            ServerTime will return the original timestamp.
-            LocalTime will convert the timestamp into your local machine's timezone.
-            UTC will convert the timestamp into UTC format (GMT+0).
-            You need to set TimeZone and LocalTimeZone (.NET core only) for these to work.
+            Configures the type of timezone conversion done on all timestamps sent/recieved from the FTP server.
+            `ServerTime` will return the original timestamp as reported by the FTP server.
+            `LocalTime` will convert the timestamp into your local machine's timezone.
+            `UTC` will convert the timestamp into UTC format (GMT+0).
+            You need to set `ServerTimeZone` and `ClientTimeZone` for these to work.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpConfig.ServerTimeZone">
+            <summary>
+            The timezone of the FTP server. Defaults to UTC.
+            If the server returns timestamps in UTC then keep this `TimeZoneInfo.Utc`.
+            Use `SetServerTimeZone` to easily set this property.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpConfig.ClientTimeZone">
+            <summary>
+            The timezone of your client machine. Defaults to `TimeZoneInfo.Local`.
+            If your machine is synchronized with UTC then keep this `TimeZoneInfo.Utc`.
+            Use `SetClientTimeZone` to easily set this property.
             </summary>
         </member>
         <member name="P:FluentFTP.FtpConfig.BulkListing">
@@ -5886,6 +6088,13 @@
             <summary>
             Gets or sets the retry attempts allowed when a verification failure occurs during download or upload.
             This value must be set to 1 or more.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpConfig.VerifyMethod">
+            <summary>
+            Defines which verification types should be performed when 
+            uploading/downloading files using the high-level APIs.
+            Multiple verification types can be combined.
             </summary>
         </member>
         <member name="P:FluentFTP.FtpConfig.UploadRateLimit">
@@ -5960,6 +6169,11 @@
             <summary>
             The local socket will be bound to the given local IP/interface.
             This is useful if you have several usable public IP addresses and want to use a particular one.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpConfig.PostConnect">
+            <summary>
+            Enables/disables the init sequence performed immediately after connection for some servers, like IBM OS/400.
             </summary>
         </member>
         <member name="P:FluentFTP.FtpConfig.CustomStream">
@@ -6539,6 +6753,11 @@
             Human readable results
             </summary>
         </member>
+        <member name="M:FluentFTP.FtpResult.ToStatus">
+            <summary>
+            Convert this object to a FtpStatus enum for quick comparison.
+            </summary>
+        </member>
         <member name="T:FluentFTP.FtpSizeReply">
             <summary>
             Reply from a SIZE command
@@ -6569,6 +6788,11 @@
             If true, then try the very rarely used Implicit FTP mode.
             </summary>
         </member>
+        <member name="P:FluentFTP.Model.Functions.FtpAutoDetectConfig.AbortOnTimeout">
+            <summary>
+            If true, timeouts will lead to an exception, otherwise we will try the next profile.
+            </summary>
+        </member>
         <member name="P:FluentFTP.Model.Functions.FtpAutoDetectConfig.RequireEncryption">
             <summary>
             If true, then we will not try the insecure FTP unencrypted mode, and only try FTPS.
@@ -6578,6 +6802,168 @@
         <member name="P:FluentFTP.Model.Functions.FtpAutoDetectConfig.ProtocolPriority">
             <summary>
             List of protocols to be tried, and the order they should be tried in.
+            </summary>
+        </member>
+        <member name="T:FluentFTP.Monitors.AsyncFtpMonitor">
+            <summary>
+            An async FTP folder monitor that monitors specific remote folders on the FTP server.
+            It triggers the `ChangeDetected` event when files are added, changed or removed.
+            Internally it polls the remote folder(s) every `PollInterval` and checks for changed files.
+            If `WaitForUpload` is true, then the file is only detected as an added file if the file size is stable.
+            </summary>
+        </member>
+        <member name="E:FluentFTP.Monitors.AsyncFtpMonitor.ChangeDetected">
+            <summary>
+            Event triggered when any change is detected
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.AsyncFtpMonitor.#ctor(FluentFTP.AsyncFtpClient,System.Collections.Generic.List{System.String})">
+            <summary>
+            Create a new FTP monitor.
+            Provide a valid FTP client, and then do not use this client for any other purpose.
+            This FTP client would then be owned and controlled by this class.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.AsyncFtpMonitor.Start">
+            <summary>
+            Starts monitoring the FTP folder
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.AsyncFtpMonitor.Stop">
+            <summary>
+            Stops monitoring the FTP folder
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.AsyncFtpMonitor.PollFolder(System.Object)">
+            <summary>
+            Polls the FTP folder for changes
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.AsyncFtpMonitor.GetCurrentListing">
+            <summary>
+            Gets the current listing of files from the FTP server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.AsyncFtpMonitor.Dispose">
+            <summary>
+            Releases the resources used by the FtpFolderMonitor
+            </summary>
+        </member>
+        <member name="P:FluentFTP.Monitors.BaseFtpMonitor.Active">
+            <summary>
+            Is the monitoring started?
+            </summary>
+        </member>
+        <member name="P:FluentFTP.Monitors.BaseFtpMonitor.FolderPaths">
+            <summary>
+            Gets the monitored FTP folder path(s)
+            </summary>
+        </member>
+        <member name="P:FluentFTP.Monitors.BaseFtpMonitor.PollInterval">
+            <summary>
+            Gets or sets the polling interval. Default is 10 minutes.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.Monitors.BaseFtpMonitor.WaitForUpload">
+            <summary>
+            Whether to wait for list items to be fully uploaded (having a stable file size) before reporting them as added.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.Monitors.BaseFtpMonitor.Recursive">
+            <summary>
+            Gets or sets whether to recursively monitor subfolders
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.BaseFtpMonitor.HandleUnstableFiles(System.Collections.Generic.Dictionary{System.String,System.Int64})">
+            <summary>
+            Handles unstable files when WaitForUpload is true
+            </summary>
+        </member>
+        <member name="T:FluentFTP.Monitors.BlockingAsyncFtpMonitor">
+             <summary>
+             An async FTP folder monitor that monitors specific remote folders on the FTP server.
+             It triggers the `ChangeDetected` event when files are added, changed or removed.
+             Internally it polls the remote folder(s) every `PollInterval` and checks for changed files.
+             If `WaitForUpload` is true, then the file is only detected as an added when the size is stable.
+            
+             NOTE: This is user contributed code and uses an unusual async pattern.
+             Refer to the original PR to understand the design principles:
+             https://github.com/robinrodricks/FluentFTP/pull/1663
+             </summary>
+             
+        </member>
+        <member name="F:FluentFTP.Monitors.BlockingAsyncFtpMonitor.ChangeDetected">
+            <summary>
+            Sets the handler that is called when changes are detected in the monitored folder(s)
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.BlockingAsyncFtpMonitor.#ctor(FluentFTP.AsyncFtpClient,System.Collections.Generic.List{System.String})">
+            <summary>
+            Create a new FTP monitor.
+            Provide a valid FTP client, and then do not use this client for any other purpose.
+            This FTP client would then be owned and controlled by this class.
+            The client can be used in the handler to perform FTP operations.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.BlockingAsyncFtpMonitor.Start(System.Threading.CancellationToken)">
+            <summary>
+            Monitor the FTP folder(s) until the token is cancelled
+            or an exception occurs in the FTP client or the handler.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.BlockingAsyncFtpMonitor.PollFolder(System.Threading.CancellationToken)">
+            <summary>
+            Polls the FTP folder(s) for changes
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.BlockingAsyncFtpMonitor.GetCurrentListing(System.Threading.CancellationToken)">
+            <summary>
+            Gets the current list items from the FTP server
+            </summary>
+        </member>
+        <member name="T:FluentFTP.Monitors.FtpMonitor">
+            <summary>
+            A synchronous FTP folder monitor that monitors specific remote folders on the FTP server.
+            It triggers the `ChangeDetected` event when files are added, changed or removed.
+            Internally it polls the remote folder(s) every `PollInterval` and checks for changed files.
+            If `WaitForUpload` is true, then the file is only detected as an added file if the file size is stable.
+            </summary>
+        </member>
+        <member name="E:FluentFTP.Monitors.FtpMonitor.ChangeDetected">
+            <summary>
+            Event triggered when any change is detected
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.FtpMonitor.#ctor(FluentFTP.FtpClient,System.Collections.Generic.List{System.String})">
+            <summary>
+            Create a new FTP monitor.
+            Provide a valid FTP client, and then do not use this client for any other purpose.
+            This FTP client would then be owned and controlled by this class.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.FtpMonitor.Start">
+            <summary>
+            Starts monitoring the FTP folder
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.FtpMonitor.Stop">
+            <summary>
+            Stops monitoring the FTP folder
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.FtpMonitor.PollFolder(System.Object)">
+            <summary>
+            Polls the FTP folder for changes
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.FtpMonitor.GetCurrentListing">
+            <summary>
+            Gets the current listing of files from the FTP server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Monitors.FtpMonitor.Dispose">
+            <summary>
+            Releases the resources used by the FtpFolderMonitor
             </summary>
         </member>
         <member name="T:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientBlueCoatProxy">
@@ -6646,8 +7032,11 @@
         </member>
         <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientProxy.ConnectAsync(FluentFTP.FtpSocketStream,System.Threading.CancellationToken)">
             <summary> Redefine connect for FtpClient : authentication on the Proxy  </summary>
-            <param name="stream">The socket stream.</param>
-            <param name="token">Cancellation token.</param>
+            <inheritdoc />
+        </member>
+        <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientProxy.ConnectAsync(FluentFTP.FtpSocketStream,System.String,System.Int32,FluentFTP.FtpIpVersion,System.Threading.CancellationToken)">
+            <summary> Redefine connect for FtpClient : authentication on the Proxy  </summary>
+            <inheritdoc />
         </member>
         <member name="T:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks4aProxy">
             <summary>
@@ -6670,9 +7059,10 @@
             </summary>
         </member>
         <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks4aProxy.ConnectAsync(FluentFTP.FtpSocketStream,System.Threading.CancellationToken)">
-            <summary>
-            Connect
-            </summary>
+            <inheritdoc />
+        </member>
+        <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks4aProxy.ConnectAsync(FluentFTP.FtpSocketStream,System.String,System.Int32,FluentFTP.FtpIpVersion,System.Threading.CancellationToken)">
+            <inheritdoc />
         </member>
         <member name="T:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks4Proxy">
             <summary>
@@ -6695,9 +7085,10 @@
             </summary>
         </member>
         <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks4Proxy.ConnectAsync(FluentFTP.FtpSocketStream,System.Threading.CancellationToken)">
-            <summary>
-            Connect
-            </summary>
+            <inheritdoc />
+        </member>
+        <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks4Proxy.ConnectAsync(FluentFTP.FtpSocketStream,System.String,System.Int32,FluentFTP.FtpIpVersion,System.Threading.CancellationToken)">
+            <inheritdoc />
         </member>
         <member name="T:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks5Proxy">
             <summary>
@@ -6715,9 +7106,10 @@
             </summary>
         </member>
         <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks5Proxy.ConnectAsync(FluentFTP.FtpSocketStream,System.Threading.CancellationToken)">
-            <summary>
-            Connect
-            </summary>
+            <inheritdoc/>
+        </member>
+        <member name="M:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientSocks5Proxy.ConnectAsync(FluentFTP.FtpSocketStream,System.String,System.Int32,FluentFTP.FtpIpVersion,System.Threading.CancellationToken)">
+            <inheritdoc/>
         </member>
         <member name="T:FluentFTP.Proxy.AsyncProxy.AsyncFtpClientUserAtHostProxy">
             <summary> A FTP client with a user@host proxy identification. </summary>
@@ -7551,9 +7943,27 @@
             Return true if your server is detected by the given FTP server welcome message.
             </summary>
         </member>
+        <member name="M:FluentFTP.Servers.Handlers.IBMOS400FtpServer.DetectBySyst(System.String)">
+            <summary>
+            Return true if your server is detected by the given SYST response message.
+            Its a fallback method if the server did not send an identifying welcome message.
+            </summary>
+        </member>
         <member name="M:FluentFTP.Servers.Handlers.IBMOS400FtpServer.GetParser">
             <summary>
             Return the default file listing parser to be used with your FTP server.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Servers.Handlers.IBMOS400FtpServer.AfterConnected(FluentFTP.FtpClient)">
+            <summary>
+            Perform server-specific post-connection commands here.
+            Return true if you executed a server-specific command.
+            </summary>
+        </member>
+        <member name="M:FluentFTP.Servers.Handlers.IBMOS400FtpServer.AfterConnectedAsync(FluentFTP.AsyncFtpClient,System.Threading.CancellationToken)">
+            <summary>
+            Perform server-specific post-connection commands here.
+            Return true if you executed a server-specific command.
             </summary>
         </member>
         <member name="T:FluentFTP.Servers.Handlers.IBMzOSFtpServer">
@@ -8140,6 +8550,13 @@
             <param name="count">Number of bytes to read</param>
             <returns>The number of bytes read</returns>
         </member>
+        <member name="M:FluentFTP.FtpDataStream.Read(System.Span{System.Byte})">
+            <summary>
+            Reads data off the stream
+            </summary>
+            <param name="buffer">The buffer to read into</param>
+            <returns>The number of bytes read</returns>
+        </member>
         <member name="M:FluentFTP.FtpDataStream.ReadAsync(System.Byte[],System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
             Reads data off the stream asynchronously
@@ -8147,6 +8564,14 @@
             <param name="buffer">The buffer to read into</param>
             <param name="offset">Where to start in the buffer</param>
             <param name="count">Number of bytes to read</param>
+            <param name="token">The cancellation token for this task</param>
+            <returns>The number of bytes read</returns>
+        </member>
+        <member name="M:FluentFTP.FtpDataStream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)">
+            <summary>
+            Reads data off the stream asynchronously
+            </summary>
+            <param name="buffer">The buffer to read into</param>
             <param name="token">The cancellation token for this task</param>
             <returns>The number of bytes read</returns>
         </member>
@@ -8158,6 +8583,12 @@
             <param name="offset">Where to start in the buffer</param>
             <param name="count">The number of bytes to write to the buffer</param>
         </member>
+        <member name="M:FluentFTP.FtpDataStream.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes data to the stream
+            </summary>
+            <param name="buffer">The buffer to write to the stream</param>
+        </member>
         <member name="M:FluentFTP.FtpDataStream.WriteAsync(System.Byte[],System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
             Writes data to the stream asynchronously
@@ -8165,6 +8596,13 @@
             <param name="buffer">The buffer to write to the stream</param>
             <param name="offset">Where to start in the buffer</param>
             <param name="count">The number of bytes to write to the buffer</param>
+            <param name="token">The <see cref="T:System.Threading.CancellationToken"/> for this task</param>
+        </member>
+        <member name="M:FluentFTP.FtpDataStream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)">
+            <summary>
+            Writes data to the stream asynchronously
+            </summary>
+            <param name="buffer">The buffer to write to the stream</param>
             <param name="token">The <see cref="T:System.Threading.CancellationToken"/> for this task</param>
         </member>
         <member name="M:FluentFTP.FtpDataStream.SetLength(System.Int64)">
@@ -8182,7 +8620,12 @@
         </member>
         <member name="M:FluentFTP.FtpDataStream.Close">
             <summary>
-            Closes the connection and reads the server's reply
+            Closes the connection and reads (and discards) the server's reply
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpDataStream.CloseAsync(System.Threading.CancellationToken)">
+            <summary>
+            Closes the connection and reads (and discards) the server's reply
             </summary>
         </member>
         <member name="M:FluentFTP.FtpDataStream.#ctor(FluentFTP.Client.BaseClient.BaseFtpClient)">
@@ -8190,11 +8633,6 @@
             Creates a new data stream object
             </summary>
             <param name="conn">The control connection to be used for carrying out this operation</param>
-        </member>
-        <member name="M:FluentFTP.FtpDataStream.Finalize">
-            <summary>
-            Finalizer
-            </summary>
         </member>
         <member name="T:FluentFTP.Streams.FtpFileStream">
             <summary>
@@ -8286,11 +8724,6 @@
             Stream class used for talking. Used by FtpClient, extended by FtpDataStream
             </summary>
         </member>
-        <member name="P:FluentFTP.FtpSocketStream.NetworkStream">
-            <summary>
-            The non-encrypted stream
-            </summary>
-        </member>
         <member name="F:FluentFTP.FtpSocketStream.Client">
             <summary>
             The client this stream is associated with
@@ -8301,20 +8734,65 @@
             This stream connection to be associated with this client
             </summary>
         </member>
+        <member name="F:FluentFTP.FtpSocketStream.m_netStream">
+            <summary>
+            This FtpSocketStream could be a NetStream
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpSocketStream.m_sslStream">
+            <summary>
+            This FtpSocketStream could be a SslStream over a NetStream
+            </summary>
+        </member>
+        <member name="F:FluentFTP.FtpSocketStream.m_customStream">
+            <summary>
+            This FtpSocketStream could be a customStream (such as a GnuTlsStream)
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.BaseStream">
+            <summary>
+            Gets the underlying stream, could be a NetworkStream, SslStream or CustomStream
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.IsControlConnection">
+            <summary>
+            Is this stream the control connection?
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.IsDisposed">
+            <summary>
+            Gets a value indicating if this socket stream is disposed
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.IsEncrypted">
+            <summary>
+            Gets a value indicating if encryption is being used
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.ConnectionState">
+            <summary>
+            Actual connection state from the FTP client to the FTP server, as determined by the NOOP Deamon.
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.IsConnected">
+            <summary>
+            Gets a value indicating if this socket stream is connected
+            </summary>
+        </member>
         <member name="F:FluentFTP.FtpSocketStream.m_lastActivity">
             <summary>
             Used for tracking read/write activity on the socket
-            to determine if Poll() should be used to test for
-            socket connectivity. The socket in this class will
-            not know it has been disconnected if the remote host
-            closes the connection first. Using Poll() avoids
-            the exception that would be thrown when trying to
-            read or write to the disconnected socket.
             </summary>
         </member>
         <member name="P:FluentFTP.FtpSocketStream.Socket">
             <summary>
-            The socket used for talking
+            The socket used for talking on this connection
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.SocketDataAvailable">
+            <summary>
+            Gets the number of available bytes on the socket, 0 if the
+            socket has not been initialized.
             </summary>
         </member>
         <member name="F:FluentFTP.FtpSocketStream.SslSessionLength">
@@ -8323,63 +8801,19 @@
             control connection
             </summary>
         </member>
-        <member name="P:FluentFTP.FtpSocketStream.SocketPollInterval">
-            <summary>
-            Gets or sets the length of time in milliseconds
-            that must pass since the last socket activity
-            before calling Poll() on the socket to test for
-            connectivity. Setting this interval too low will
-            have a negative impact on performance. Setting this
-            interval to 0 disables Poll()'ing all together.
-            The default value is 15 seconds.
-            </summary>
-        </member>
-        <member name="P:FluentFTP.FtpSocketStream.SocketDataAvailable">
-            <summary>
-            Gets the number of available bytes on the socket, 0 if the
-            socket has not been initialized. This property is used internally
-            by FtpClient in an effort to detect disconnections and gracefully
-            reconnect the control connection.
-            </summary>
-        </member>
-        <member name="P:FluentFTP.FtpSocketStream.IsConnected">
-            <summary>
-            Gets a value indicating if this socket stream is connected
-            </summary>
-        </member>
-        <member name="P:FluentFTP.FtpSocketStream.IsEncrypted">
-            <summary>
-            Gets a value indicating if encryption is being used
-            </summary>
-        </member>
-        <member name="P:FluentFTP.FtpSocketStream.IsControlConnection">
-            <summary>
-            Is this stream the control connection?
-            </summary>
-        </member>
-        <member name="P:FluentFTP.FtpSocketStream.SslProtocolActive">
-            <summary>
-            The negotiated SSL/TLS protocol version. Will have a valid value after connection is complete.
-            </summary>
-        </member>
-        <member name="P:FluentFTP.FtpSocketStream.BaseStream">
-            <summary>
-            Gets the underlying stream, could be a NetworkStream, SslStream or CustomStream
-            </summary>
-        </member>
         <member name="P:FluentFTP.FtpSocketStream.CanRead">
             <summary>
             Gets a value indicating if this stream can be read
             </summary>
         </member>
-        <member name="P:FluentFTP.FtpSocketStream.CanSeek">
-            <summary>
-            Gets a value indicating if this stream if seekable
-            </summary>
-        </member>
         <member name="P:FluentFTP.FtpSocketStream.CanWrite">
             <summary>
             Gets a value indicating if this stream can be written to
+            </summary>
+        </member>
+        <member name="P:FluentFTP.FtpSocketStream.CanSeek">
+            <summary>
+            Gets a value indicating if this stream if seekable
             </summary>
         </member>
         <member name="P:FluentFTP.FtpSocketStream.Length">
@@ -8391,11 +8825,6 @@
             <summary>
             Gets the current position of the stream. Trying to
             set this property throws an InvalidOperationException()
-            </summary>
-        </member>
-        <member name="E:FluentFTP.FtpSocketStream.ValidateCertificate">
-            <summary>
-            Event is fired when a SSL certificate needs to be validated
             </summary>
         </member>
         <member name="P:FluentFTP.FtpSocketStream.ReadTimeout">
@@ -8419,6 +8848,11 @@
         <member name="P:FluentFTP.FtpSocketStream.RemoteEndPoint">
             <summary>
             Gets the remote end point of the socket
+            </summary>
+        </member>
+        <member name="E:FluentFTP.FtpSocketStream.ValidateCertificate">
+            <summary>
+            Event is fired when a SSL certificate needs to be validated
             </summary>
         </member>
         <member name="M:FluentFTP.FtpSocketStream.OnValidateCertificate(System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Chain,System.Net.Security.SslPolicyErrors)">
@@ -8488,6 +8922,13 @@
             <param name="count">Number of bytes to be read</param>
             <returns>The amount of bytes read from the stream</returns>
         </member>
+        <member name="M:FluentFTP.FtpSocketStream.Read(System.Span{System.Byte})">
+            <summary>
+            Reads data from the stream
+            </summary>
+            <param name="buffer">Buffer to read into</param>
+            <returns>The amount of bytes read from the stream</returns>
+        </member>
         <member name="M:FluentFTP.FtpSocketStream.ReadAsync(System.Byte[],System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
             Reads data from the stream
@@ -8495,6 +8936,14 @@
             <param name="buffer">Buffer to read into</param>
             <param name="offset">Where in the buffer to start</param>
             <param name="count">Number of bytes to be read</param>
+            <param name="token">The <see cref="T:System.Threading.CancellationToken"/> for this task</param>
+            <returns>The amount of bytes read from the stream</returns>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)">
+            <summary>
+            Reads data from the stream
+            </summary>
+            <param name="buffer">Buffer to read into</param>
             <param name="token">The <see cref="T:System.Threading.CancellationToken"/> for this task</param>
             <returns>The amount of bytes read from the stream</returns>
         </member>
@@ -8507,7 +8956,7 @@
         </member>
         <member name="M:FluentFTP.FtpSocketStream.ReadAllLines(System.Text.Encoding,System.Int32)">
             <summary>
-            Reads all line from the socket
+            Reads all lines from the socket
             </summary>
             <param name="encoding">The type of encoding used to convert from byte[] to string</param>
             <param name="bufferSize">The size of the buffer</param>
@@ -8523,7 +8972,7 @@
         </member>
         <member name="M:FluentFTP.FtpSocketStream.ReadAllLinesAsync(System.Text.Encoding,System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Reads all line from the socket
+            Reads all lines from the socket
             </summary>
             <param name="encoding">The type of encoding used to convert from byte[] to string</param>
             <param name="bufferSize">The size of the buffer</param>
@@ -8538,6 +8987,12 @@
             <param name="offset">Where in the buffer to start</param>
             <param name="count">Number of bytes to be written</param>
         </member>
+        <member name="M:FluentFTP.FtpSocketStream.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes data to the stream
+            </summary>
+            <param name="buffer">Buffer to write to stream</param>
+        </member>
         <member name="M:FluentFTP.FtpSocketStream.WriteAsync(System.Byte[],System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
             Writes data to the stream asynchronously
@@ -8545,6 +9000,13 @@
             <param name="buffer">Buffer to write to stream</param>
             <param name="offset">Where in the buffer to start</param>
             <param name="count">Number of bytes to be written</param>
+            <param name="token">The <see cref="T:System.Threading.CancellationToken"/> for this task</param>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)">
+            <summary>
+            Writes data to the stream asynchronously
+            </summary>
+            <param name="buffer">Buffer to write to stream</param>
             <param name="token">The <see cref="T:System.Threading.CancellationToken"/> for this task</param>
         </member>
         <member name="M:FluentFTP.FtpSocketStream.WriteLine(System.Text.Encoding,System.String)">
@@ -8561,16 +9023,6 @@
             <param name="encoding">Encoding used for writing the line</param>
             <param name="buf">The data to write</param>
             <param name="token">The <see cref="T:System.Threading.CancellationToken"/> for this task</param>
-        </member>
-        <member name="M:FluentFTP.FtpSocketStream.Dispose(System.Boolean)">
-            <summary>
-            Disconnects from server
-            </summary>
-        </member>
-        <member name="M:FluentFTP.FtpSocketStream.DisposeSocket">
-            <summary>
-            Safely close the socket if its open
-            </summary>
         </member>
         <member name="M:FluentFTP.FtpSocketStream.SetSocketOption(System.Net.Sockets.SocketOptionLevel,System.Net.Sockets.SocketOptionName,System.Boolean)">
             <summary>
@@ -8633,7 +9085,17 @@
             <param name="ipVersions">Internet Protocol versions to support during the connection phase</param>
             <param name="token">The token that can be used to cancel the entire process</param>
         </member>
-        <member name="M:FluentFTP.FtpSocketStream.ConnectAsyncHelper(System.Net.IPAddress,System.Int32,System.Threading.CancellationToken)">
+        <member name="M:FluentFTP.FtpSocketStream.EnableCancellation(System.Threading.Tasks.Task,System.Threading.CancellationToken,System.Action)">
+            <summary>
+            Helper for Async cancel in ConnectAsync 
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.EnableCancellation``1(System.Threading.Tasks.Task{``0},System.Threading.CancellationToken,System.Action)">
+            <summary>
+            Helper for Async cancel in ConnectAsync 
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.ConnectHelperAsync(System.Net.IPAddress,System.Int32,System.Threading.CancellationToken)">
             <summary>
             Connect to the specified host
             Detects timeout and throws that explicitly
@@ -8665,17 +9127,6 @@
             <param name="token">The token that can be used to cancel the entire process</param>
             <exception cref="T:System.Security.Authentication.AuthenticationException">Thrown when authentication fails</exception>
         </member>
-        <member name="M:FluentFTP.FtpSocketStream.CreateBufferStream">
-            <summary>
-            Conditionally create a SSL BufferStream based on the configuration in FtpClient.SslBuffering.
-            </summary>
-        </member>
-        <member name="M:FluentFTP.FtpSocketStream.GetBufferStream">
-            <summary>
-            If SSL Buffering is enabled it returns the BufferStream, else returns the internal NetworkStream.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:FluentFTP.FtpSocketStream.Listen(System.Net.IPAddress,System.Int32)">
             <summary>
             Instructs this stream to listen for connections on the specified address and port
@@ -8688,23 +9139,39 @@
             Accepts a connection from a listening socket
             </summary>
         </member>
-        <member name="M:FluentFTP.FtpSocketStream.BeginAccept(System.AsyncCallback,System.Object)">
-            <summary>
-            Asynchronously accepts a connection from a listening socket
-            </summary>
-            <param name="callback"></param>
-            <param name="state"></param>
-            <returns></returns>
-        </member>
-        <member name="M:FluentFTP.FtpSocketStream.EndAccept(System.IAsyncResult)">
-            <summary>
-            Completes a BeginAccept() operation
-            </summary>
-            <param name="ar">IAsyncResult returned from BeginAccept</param>
-        </member>
-        <member name="M:FluentFTP.FtpSocketStream.AcceptAsync">
+        <member name="M:FluentFTP.FtpSocketStream.AcceptAsync(System.Threading.CancellationToken)">
             <summary>
             Accepts a connection from a listening socket
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.Close">
+            <summary>
+            Disconnects from server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.Dispose">
+            <summary>
+            Disconnects from server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.CloseAsync(System.Threading.CancellationToken)">
+            <summary>
+            CloseAsync, disconnects from server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.DisposeAsync">
+            <summary>
+            DisposeAsync, disconnects from server
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.DisposeAsyncCore">
+            <summary>
+            Disconnects from server, actually
+            </summary>
+        </member>
+        <member name="M:FluentFTP.FtpSocketStream.DisposeSocketAsync">
+            <summary>
+            Safely close the socket if its open
             </summary>
         </member>
     </members>

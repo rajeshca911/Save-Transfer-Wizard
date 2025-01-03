@@ -11,9 +11,30 @@
     <AssemblyName>SaveTrfr</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>false</MapFileExtensions>
+    <SupportUrl>https://github.com/rajeshca911/Save-Transfer-Wizard</SupportUrl>
+    <ErrorReportUrl>https://github.com/rajeshca911/Save-Transfer-Wizard/issues</ErrorReportUrl>
+    <ProductName>Save Transfer Wizard</ProductName>
+    <PublisherName>Rajesh</PublisherName>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.2.0</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -47,9 +68,28 @@
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>folderIco.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>6C8C7881D65AB7AE80C181D9FB772F69B7E604B1</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>SaveTrfr_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentFTP, Version=48.0.1.0, Culture=neutral, PublicKeyToken=f4af092b1d8df44f, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentFTP.48.0.1\lib\net472\FluentFTP.dll</HintPath>
+    <Reference Include="FluentFTP, Version=52.0.0.0, Culture=neutral, PublicKeyToken=f4af092b1d8df44f, processorArchitecture=MSIL">
+      <HintPath>packages\FluentFTP.52.0.0\lib\net472\FluentFTP.dll</HintPath>
+    </Reference>
+    <Reference Include="libdebug, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\libdebug.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -76,6 +116,8 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommonModule.vb" />
+    <Compile Include="FileDownloader.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -87,6 +129,7 @@
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -98,6 +141,27 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Offsets.vb" />
+    <Compile Include="PS5Console.vb" />
+    <Compile Include="PS5FTPFORM.Designer.vb">
+      <DependentUpon>PS5FTPFORM.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PS5FTPFORM.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SaveTransferAndDecryptor.Designer.vb">
+      <DependentUpon>SaveTransferAndDecryptor.vb</DependentUpon>
+    </Compile>
+    <Compile Include="SaveTransferAndDecryptor.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StartupForm.Designer.vb">
+      <DependentUpon>StartupForm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="StartupForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TrfrProtocalls.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form1.resx">
@@ -108,6 +172,15 @@
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PS5FTPFORM.resx">
+      <DependentUpon>PS5FTPFORM.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SaveTransferAndDecryptor.resx">
+      <DependentUpon>SaveTransferAndDecryptor.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StartupForm.resx">
+      <DependentUpon>StartupForm.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -121,9 +194,10 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="SaveTrfr_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\directory_sync_FILL0_wght400_GRAD0_opsz24.png" />
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +205,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\upload_FILL0_wght400_GRAD0_opsz24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="folderIco.ico" />
+    <Content Include="icons8-ftp-64.ico" />
+    <Content Include="libdebug.dll" />
+    <None Include="Resources\GREEN2.png" />
+    <None Include="Resources\1350930.png" />
+    <None Include="Resources\1350958.png" />
+    <None Include="Resources\blue.bmp" />
+    <None Include="Resources\blue.png" />
+    <None Include="Resources\YELLOW.png" />
+    <None Include="Resources\GREEN.png" />
+    <None Include="Resources\RED.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

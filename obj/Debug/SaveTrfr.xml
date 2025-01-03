@@ -22,6 +22,11 @@ SaveTrfr
   resource lookups using this strongly typed resource class.
 </summary>
 </member>
+<member name="P:SaveTrfr.My.Resources.Resources.blue">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
 <member name="P:SaveTrfr.My.Resources.Resources.directory_sync_FILL0_wght400_GRAD0_opsz24">
 <summary>
   Looks up a localized resource of type System.Drawing.Bitmap.
@@ -32,7 +37,22 @@ SaveTrfr
   Looks up a localized resource of type System.Drawing.Bitmap.
 </summary>
 </member>
+<member name="P:SaveTrfr.My.Resources.Resources.GREEN">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SaveTrfr.My.Resources.Resources.RED">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
 <member name="P:SaveTrfr.My.Resources.Resources.upload_FILL0_wght400_GRAD0_opsz24">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SaveTrfr.My.Resources.Resources.YELLOW">
 <summary>
   Looks up a localized resource of type System.Drawing.Bitmap.
 </summary>

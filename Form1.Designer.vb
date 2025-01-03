@@ -72,9 +72,9 @@ Partial Class Form1
         Me.Label2.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label2.Location = New System.Drawing.Point(232, 36)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(30, 13)
+        Me.Label2.Size = New System.Drawing.Size(57, 13)
         Me.Label2.TabIndex = 3
-        Me.Label2.Text = "Port"
+        Me.Label2.Text = "FTP Port"
         '
         'UserCmbBox
         '
@@ -144,9 +144,9 @@ Partial Class Form1
         '
         Me.Statlbl.Font = New System.Drawing.Font("Segoe UI", 9.75!, CType((System.Drawing.FontStyle.Bold Or System.Drawing.FontStyle.Underline), System.Drawing.FontStyle), System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Statlbl.ForeColor = System.Drawing.Color.Maroon
-        Me.Statlbl.Location = New System.Drawing.Point(12, 298)
+        Me.Statlbl.Location = New System.Drawing.Point(1, 351)
         Me.Statlbl.Name = "Statlbl"
-        Me.Statlbl.Size = New System.Drawing.Size(355, 27)
+        Me.Statlbl.Size = New System.Drawing.Size(378, 24)
         Me.Statlbl.TabIndex = 9
         Me.Statlbl.Text = "Status : Not Connected"
         '
@@ -175,9 +175,9 @@ Partial Class Form1
         '
         Me.Verlbl.Font = New System.Drawing.Font("Segoe UI Semibold", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Verlbl.ForeColor = System.Drawing.Color.DarkBlue
-        Me.Verlbl.Location = New System.Drawing.Point(2, 325)
+        Me.Verlbl.Location = New System.Drawing.Point(1, 375)
         Me.Verlbl.Name = "Verlbl"
-        Me.Verlbl.Size = New System.Drawing.Size(313, 24)
+        Me.Verlbl.Size = New System.Drawing.Size(378, 24)
         Me.Verlbl.TabIndex = 12
         Me.Verlbl.Text = "Save Directories"
         '
@@ -186,7 +186,7 @@ Partial Class Form1
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.White
-        Me.ClientSize = New System.Drawing.Size(379, 349)
+        Me.ClientSize = New System.Drawing.Size(379, 420)
         Me.Controls.Add(Me.Verlbl)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.CmbSave)

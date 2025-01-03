@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 15 for Windows Desktop
-VisualStudioVersion = 15.0.33919.361
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.35325.158
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SaveTrfr", "SaveTrfr\SaveTrfr.vbproj", "{06ACDDE3-7D57-4B0E-95CD-7A91A4CB42B6}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SaveTrfr", "SaveTrfr.vbproj", "{06ACDDE3-7D57-4B0E-95CD-7A91A4CB42B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {9FA2A744-9D4A-40D3-B1F9-4DC88668D5AD}
+		SolutionGuid = {95130DC9-ADEC-4D88-9BDD-B8A66AE354F1}
 	EndGlobalSection
 EndGlobal
