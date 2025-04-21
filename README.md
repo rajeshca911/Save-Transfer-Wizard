@@ -43,11 +43,10 @@ Follow these steps to transfer decrypted saves using the provided tool:
 
 5. **Click Connect**  
    - Establish the connection by clicking the **Connect** button.
-   - Additional locations may be added to the '**ComboMountedPaths.txt**' file.
-```bash
-  /mnt/pfs
- /mnt/sandbox
-```
+  ~~ - Additional locations may be added to the '**ComboMountedPaths.txt**' file.~~
+ - Added FTP browser from version(2.0)
+
+
 6. **Select Save**  
    The tool will automatically populate users and save data in the combo boxes. Select the desired save and click **Mount**.
 
