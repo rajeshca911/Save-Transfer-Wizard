@@ -43,7 +43,8 @@ Follow these steps to transfer decrypted saves using the provided tool:
 
 5. **Click Connect**  
    - Establish the connection by clicking the **Connect** button.
-  ~~ - Additional locations may be added to the '**ComboMountedPaths.txt**' file.~~
+   - 
+ ~~Additional locations may be added to the '**ComboMountedPaths.txt**' file.~~
  - Added FTP browser from version(2.0)
 
 
