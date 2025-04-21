@@ -17,6 +17,10 @@
 - Works only on windows
 - Require to enable FTP in console
 
+## ToDo
+
+- Add separate option for FTP browsing
+
 
 
 ## Video Tutorial
