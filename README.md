@@ -104,6 +104,35 @@ Follow these steps to transfer decrypted saves using the provided tool:
 - click on Delete & confirm
 - Save will be Deleted
 
+## 📁 Console Directory Explorer (FTP Mode)
+
+### ⚙️ Features
+
+- 🔌 **Connect to PS5 over FTP**  
+  Input your console's IP address and port number (commonly `1337`, `2121`, or `21`) to initiate the FTP session.
+
+- 🧭 **Directory Tree Viewer**  
+  Visually browse your PS5’s internal directories using a TreeView-style interface, similar to a file manager.
+
+- 📥 **Transfer Saves**  
+  Select game save folders and download them to your PC for backup or modding.
+
+---
+
+## 📝 How to Use
+
+- ### ✅ Enable FTP on PS5  
+  Launch your FTP server (e.g., **GoldHEN FTP server**) on the PS5 and take note of the IP address shown on screen.
+
+- ### 🌐 Enter Connection Info in the Tool  
+  - **IP Address:** `e.g., 192.168.1.101`  
+  - **Port:** `1337`, `2121`, or another FTP port  
+  - Click the **Connect** button to begin browsing.
+
+- ### 📂 Explore and Transfer Files  
+  - Once connected, a directory tree will appear.  
+  - Navigate to the game save path (commonly `/mnt/sandbox/`).  
+  - Select the desired folder and click **Download** to back it up.
 
 
 ---
